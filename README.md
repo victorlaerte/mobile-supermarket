@@ -26,18 +26,20 @@ O mobile supermarket disponibiliza uma API Rest que permite que aplicativos cons
 A autenticação e criação de novos usuários é feita através da url auth.mobilesupermarket.wedeploy.io utilizando os endpoints a seguir:
 
 * Criar usuário:
+
+Nome | Descrição 
+------------ | ------------ 
 Endpoint | /users 
 Método | POST
-Parâmetros | name: String
- | email: String
- | password: String
+Parâmetros | name: String<br>email: String<br>password: String
 
 * Login: 
+
+Nome | Descrição 
+------------ | ------------ 
 Endpoint | /oauth/token
 Método | POST
-Parâmetros | username: String
- | password: String
- | grant_type: "password"
+Parâmetros | username: String <br>password: String<br>grant_type: "password"
 
 ##	Acesso aos produtos e carrinho
 O acesso aos dados do Mobile Supermarket é feito através da url data.mobilesupermarket.wedeploy.io. Para efetuar qualquer operação sobre os dados, é necessário estar logado. Uma vez logado, o token de acesso deve ser enviado no campo "Authorization" do header de cada request, cujo valor é "Bearer [access_token]".
@@ -48,15 +50,13 @@ O json {"field":"value"} deve estar codificado para que a request funcione corre
 /products?filter=%7B%22type%22%3A%22fruit%22%7D
 * Listar produtos do carrinho: GET /cart
 * Salvar produtos no carrinho: 
+
+Nome | Descrição 
+------------ | ------------
 Endpoint | /cart
 Método | POST
-Parâmetros | productTitle: String
- | productPrice: double
- | productFilename: String
- | productId: String
- | userId: String
+Parâmetros | productTitle: String<br>productPrice: double<br>productFilename: String<br>productId: String<br>userId: String
 
 * Remover produto do carrinho: DELETE /cart/[id]
 	Onde id é o id do item no carrinho.
-
 
