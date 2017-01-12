@@ -1,5 +1,6 @@
-package com.victorlaerte.supermarket;
+package com.victorlaerte.supermarket.view;
 
+import com.victorlaerte.supermarket.R;
 import com.victorlaerte.supermarket.dummy.DummyContent;
 
 import android.app.Activity;
