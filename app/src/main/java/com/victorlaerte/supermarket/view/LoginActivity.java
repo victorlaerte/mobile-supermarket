@@ -2,7 +2,9 @@ package com.victorlaerte.supermarket.view;
 
 import com.victorlaerte.supermarket.R;
 import com.victorlaerte.supermarket.service.UserLoginTask;
+import com.victorlaerte.supermarket.service.UserSignUpTask;
 import com.victorlaerte.supermarket.util.AndroidUtil;
+import com.victorlaerte.supermarket.util.Validator;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -18,15 +20,20 @@ import android.view.View.OnClickListener;
 import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 public class LoginActivity extends AppCompatActivity {
 
+	private LinearLayout nameLayout;
 	private EditText nameView;
 	private EditText emailView;
 	private EditText passwordView;
+	private Button primaryActionButton;
+	private Button secondaryActionButton;
 	private View progressView;
 	private View loginFormView;
+	private View signupFormView;
 	private boolean signUp = false;
 
 	@Override
@@ -40,6 +47,8 @@ public class LoginActivity extends AppCompatActivity {
 		passwordView = (EditText) findViewById(R.id.password);
 		loginFormView = findViewById(R.id.login_form);
 		progressView = findViewById(R.id.login_progress);
+		primaryActionButton = (Button) findViewById(R.id.primary_action_button);
+		secondaryActionButton = (Button) findViewById(R.id.secondary_action_button);
 
 		passwordView.setOnEditorActionListener(new TextView.OnEditorActionListener() {
 
@@ -54,8 +63,7 @@ public class LoginActivity extends AppCompatActivity {
 			}
 		});
 
-		Button emailLoginButton = (Button) findViewById(R.id.email_login_button);
-		emailLoginButton.setOnClickListener(new OnClickListener() {
+		primaryActionButton.setOnClickListener(new OnClickListener() {
 
 			@Override
 			public void onClick(View view) {
@@ -64,15 +72,21 @@ public class LoginActivity extends AppCompatActivity {
 			}
 		});
 
-		Button signUpButton = (Button) findViewById(R.id.sign_up_button);
-		signUpButton.setOnClickListener(new OnClickListener() {
+		secondaryActionButton.setOnClickListener(new OnClickListener() {
 
 			@Override
 			public void onClick(View view) {
 
-				showSignUpForm(!signUp);
+				signUp = !signUp;
+
+				showSignUpFormToogle(signUp);
 			}
 		});
+
+	}
+
+	private void doSecondaryAction(boolean signUp) {
+
 	}
 
 	/**
@@ -89,57 +103,70 @@ public class LoginActivity extends AppCompatActivity {
 		// Store values at the time of the login attempt.
 		String email = emailView.getText().toString();
 		String password = passwordView.getText().toString();
+		String name = nameView.getText().toString();
 
 		boolean cancel = false;
 		View focusView = null;
 
-		// Check for a valid password, if the user entered one.
-		if (!TextUtils.isEmpty(password) && !isPasswordValid(password)) {
-			passwordView.setError(getString(R.string.error_invalid_password));
+		if (TextUtils.isEmpty(password)) {
+			passwordView.setError(getString(R.string.error_field_required));
 			focusView = passwordView;
 			cancel = true;
 		}
 
-		// Check for a valid email address.
 		if (TextUtils.isEmpty(email)) {
 			emailView.setError(getString(R.string.error_field_required));
 			focusView = emailView;
 			cancel = true;
-		} else if (!isEmailValid(email)) {
+		} else if (!Validator.isEmailValid(email)) {
 			emailView.setError(getString(R.string.error_invalid_email));
 			focusView = emailView;
 			cancel = true;
 		}
 
+		if (signUp) {
+
+			if (TextUtils.isEmpty(name)) {
+				nameView.setError(getString(R.string.error_field_required));
+				focusView = nameView;
+				cancel = true;
+			}
+
+			if (!isPasswordValid(password)) {
+
+				passwordView.setError(getString(R.string.error_incorrect_password));
+				focusView = passwordView;
+				cancel = true;
+			}
+		}
+
 		if (cancel) {
 
-			// There was an error; don't attempt login and focus the first
-			// form field with an error.
 			focusView.requestFocus();
 
 		} else {
 
-			// Show a progress spinner, and kick off a background task to
-			// perform the user login attempt.
-
 			AndroidUtil.hideSoftKeyboard(this);
 
 			showProgress(true);
-			UserLoginTask mAuthTask = new UserLoginTask(this, email, password);
-			mAuthTask.execute((Void) null);
+
+			if (signUp) {
+
+				UserSignUpTask signUpTask = new UserSignUpTask(this, email, password);
+				signUpTask.execute((Void) null);
+
+			} else {
+
+				UserLoginTask userLoginTask = new UserLoginTask(this, email, password);
+				userLoginTask.execute((Void) null);
+			}
 		}
-	}
-
-	private boolean isEmailValid(String email) {
-
-		//TODO: Replace this with your own logic
-		return email.contains("@");
 	}
 
 	private boolean isPasswordValid(String password) {
 
-		//TODO: Replace this with your own logic
-		return password.length() > 4;
+		// TODO: This method should be implement with the same password policy from http://public.mobilesupermarket.wedeploy.io/
+		return password.length() > 6;
 	}
 
 	private boolean isAnimationAvailable() {
@@ -155,29 +182,18 @@ public class LoginActivity extends AppCompatActivity {
 		}
 	}
 
-	private void showSignUpForm(boolean show) {
+	private void showSignUpFormToogle(boolean show) {
 
-		int shortAnimTime = getResources().getInteger(android.R.integer.config_shortAnimTime);
-		signUp = show;
+		nameView.setVisibility(signUp ? View.VISIBLE : View.GONE);
 
-		if (isAnimationAvailable()) {
-
-			nameView.animate()
-					.setDuration(shortAnimTime)
-					.alpha(show ? 0 : 1)
-					.setListener(new AnimatorListenerAdapter() {
-
-						@Override
-						public void onAnimationEnd(Animator animation) {
-
-							nameView.setVisibility(signUp ? View.VISIBLE : View.GONE);
-						}
-					});
-		} else {
-
-			nameView.setVisibility(signUp ? View.VISIBLE : View.GONE);
-
+		if (signUp) {
+			nameView.requestFocus();
 		}
+
+		primaryActionButton.setText(signUp ? getString(R.string.action_register) : getString(R.string.action_login));
+
+		secondaryActionButton.setText(signUp ? getString(R.string.action_back) : getString(R.string.action_sign_up));
+
 	}
 
 	/**

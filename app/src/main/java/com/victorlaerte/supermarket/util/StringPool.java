@@ -151,4 +151,7 @@ public class StringPool {
 
 	public static final String UTF8 = "UTF-8";
 
+	public static final String USERNAME = "username";
+
+	public static final String PASSWORD = "password";
 }

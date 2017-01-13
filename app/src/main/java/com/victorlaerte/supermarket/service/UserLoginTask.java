@@ -4,56 +4,70 @@ package com.victorlaerte.supermarket.service;
  * Created by victoroliveira on 12/01/17.
  */
 
+import java.io.IOException;
 import java.lang.ref.WeakReference;
+import java.util.HashMap;
+import java.util.Map;
 
+import javax.xml.parsers.ParserConfigurationException;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import com.victorlaerte.supermarket.util.Constants;
+import com.victorlaerte.supermarket.util.HttpMethod;
+import com.victorlaerte.supermarket.util.StringPool;
 import com.victorlaerte.supermarket.util.Validator;
+import com.victorlaerte.supermarket.util.WebServiceUtil;
 import com.victorlaerte.supermarket.view.LoginActivity;
 
 import android.os.AsyncTask;
+import android.util.Log;
 
 /**
- * Represents an asynchronous login/registration task used to authenticate
- * the user.
+ * Represents an asynchronous login task used to authenticate the user.
  */
 public class UserLoginTask extends AsyncTask<Void, Void, Boolean> {
 
-	/**
-	 * A dummy authentication store containing known user names and passwords.
-	 * TODO: remove after connecting to a real authentication system.
-	 */
-	private static final String[] DUMMY_CREDENTIALS = new String[] { "foo@example.com:hello", "bar@example.com:world" };
-
-	private final String mEmail;
-	private final String mPassword;
+	private static final String TAG = UserLoginTask.class.getName();
+	private final String email;
+	private final String password;
 	private WeakReference<LoginActivity> wLoginActivity;
+	private String url = Constants.LOGIN_BASE_URL + Constants.LOGIN_AUTH_ENDPOINT;
 
 	public UserLoginTask(LoginActivity loginActivity, String email, String password) {
 
 		wLoginActivity = new WeakReference<LoginActivity>(loginActivity);
-		mEmail = email;
-		mPassword = password;
+		this.email = email;
+		this.password = password;
 	}
 
 	@Override
 	protected Boolean doInBackground(Void... params) {
-		// TODO: attempt authentication against a network service.
+
+		Map<String, String> httpParams = new HashMap<String, String>();
+
+		httpParams.put(StringPool.USERNAME, email);
+		httpParams.put(StringPool.PASSWORD, password);
+		httpParams.put("grant_type", StringPool.PASSWORD);
 
 		try {
-			// Simulate network access.
-			Thread.sleep(2000);
-		} catch (InterruptedException e) {
+
+			JSONObject response = WebServiceUtil.readJSONResponse(url, HttpMethod.POST, httpParams);
+
+			Log.d(TAG, response.toString());
+
+		} catch (IOException e) {
+			e.printStackTrace();
+			return false;
+		} catch (ParserConfigurationException e) {
+			e.printStackTrace();
+			return false;
+		} catch (JSONException e) {
+			e.printStackTrace();
 			return false;
 		}
 
-		for (String credential : DUMMY_CREDENTIALS) {
-			String[] pieces = credential.split(":");
-			if (pieces[0].equals(mEmail)) {
-				// Account exists, return true if the password matches.
-				return pieces[1].equals(mPassword);
-			}
-		}
-
-		// TODO: register the new account here.
 		return true;
 	}
 
