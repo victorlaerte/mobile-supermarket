@@ -5,55 +5,68 @@ package com.victorlaerte.supermarket.service;
  */
 
 import java.lang.ref.WeakReference;
+import java.util.HashMap;
+import java.util.Map;
 
+import org.json.JSONObject;
+
+import com.victorlaerte.supermarket.util.Constants;
+import com.victorlaerte.supermarket.util.HttpMethod;
+import com.victorlaerte.supermarket.util.JSONUtil;
 import com.victorlaerte.supermarket.util.Validator;
+import com.victorlaerte.supermarket.util.WebServiceUtil;
 import com.victorlaerte.supermarket.view.LoginActivity;
 
 import android.os.AsyncTask;
+import android.util.Log;
 
 /**
  * Represents an asynchronous task used to register the user.
  */
 public class UserSignUpTask extends AsyncTask<Void, Void, Boolean> {
 
-	/**
-	 * A dummy authentication store containing known user names and passwords.
-	 * TODO: remove after connecting to a real authentication system.
-	 */
-	private static final String[] DUMMY_CREDENTIALS = new String[] { "foo@example.com:hello", "bar@example.com:world" };
-
-	private final String mEmail;
-	private final String mPassword;
+	private static final String TAG = UserSignUpTask.class.getName();
+	private final String name;
+	private final String email;
+	private final String password;
 	private WeakReference<LoginActivity> wLoginActivity;
+	private String url = Constants.LOGIN_BASE_URL + Constants.SIGN_UP_ENDPOINT;
+	private JSONObject jsonResponse;
 
-	public UserSignUpTask(LoginActivity loginActivity, String email, String password) {
+	public UserSignUpTask(LoginActivity loginActivity, String name, String email, String password) {
 
 		wLoginActivity = new WeakReference<LoginActivity>(loginActivity);
-		mEmail = email;
-		mPassword = password;
+		this.name = name;
+		this.email = email;
+		this.password = password;
 	}
 
 	@Override
 	protected Boolean doInBackground(Void... params) {
-		// TODO: attempt authentication against a network service.
+
+		Map<String, String> httpParams = new HashMap<String, String>();
+
+		httpParams.put(Constants.NAME, name);
+		httpParams.put(Constants.EMAIL, email);
+		httpParams.put(Constants.PASSWORD, password);
 
 		try {
-			// Simulate network access.
-			Thread.sleep(2000);
-		} catch (InterruptedException e) {
-			return false;
-		}
 
-		for (String credential : DUMMY_CREDENTIALS) {
-			String[] pieces = credential.split(":");
-			if (pieces[0].equals(mEmail)) {
-				// Account exists, return true if the password matches.
-				return pieces[1].equals(mPassword);
+			jsonResponse = WebServiceUtil.readJSONResponse(url, HttpMethod.POST, httpParams);
+
+			Log.d(TAG, jsonResponse.toString());
+
+			if (jsonResponse.getInt(Constants.STATUS_CODE) == 200) {
+
+				return true;
 			}
+
+		} catch (Exception e) {
+
+			jsonResponse = JSONUtil.createJSONErrorResponseHTTPLike(e);
 		}
 
-		// TODO: register the new account here.
-		return true;
+		return false;
 	}
 
 	@Override
@@ -63,7 +76,7 @@ public class UserSignUpTask extends AsyncTask<Void, Void, Boolean> {
 
 		if (Validator.isNotNull(loginActivity)) {
 
-			loginActivity.onLoginComplete(success);
+			loginActivity.onSignUpComplete(success, jsonResponse);
 		}
 	}
 
@@ -74,7 +87,7 @@ public class UserSignUpTask extends AsyncTask<Void, Void, Boolean> {
 
 		if (Validator.isNotNull(loginActivity)) {
 
-			loginActivity.onLoginCanceled();
+			loginActivity.onSignUpCanceled();
 		}
 	}
 }

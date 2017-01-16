@@ -1,9 +1,26 @@
 package com.victorlaerte.supermarket.view;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import com.victorlaerte.supermarket.LoginException;
 import com.victorlaerte.supermarket.R;
+import com.victorlaerte.supermarket.SignUpException;
+import com.victorlaerte.supermarket.model.Token;
+import com.victorlaerte.supermarket.model.User;
+import com.victorlaerte.supermarket.model.impl.TokenImpl;
+import com.victorlaerte.supermarket.model.impl.UserImpl;
 import com.victorlaerte.supermarket.service.UserLoginTask;
 import com.victorlaerte.supermarket.service.UserSignUpTask;
 import com.victorlaerte.supermarket.util.AndroidUtil;
+import com.victorlaerte.supermarket.util.Constants;
+import com.victorlaerte.supermarket.util.DialogUtil;
+import com.victorlaerte.supermarket.util.StringPool;
 import com.victorlaerte.supermarket.util.Validator;
 
 import android.animation.Animator;
@@ -14,6 +31,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -25,236 +43,448 @@ import android.widget.TextView;
 
 public class LoginActivity extends AppCompatActivity {
 
-	private LinearLayout nameLayout;
-	private EditText nameView;
-	private EditText emailView;
-	private EditText passwordView;
-	private Button primaryActionButton;
-	private Button secondaryActionButton;
-	private View progressView;
-	private View loginFormView;
-	private View signupFormView;
-	private boolean signUp = false;
+    private static final String TAG = LoginActivity.class.getName();
+    private LinearLayout nameLayout;
+    private EditText nameView;
+    private EditText emailView;
+    private EditText passwordView;
+    private Button primaryActionButton;
+    private Button secondaryActionButton;
+    private View progressView;
+    private View loginFormView;
+    private View signupFormView;
+    private boolean signUp = false;
+    private UserSignUpTask signUpTask = null;
+    private UserLoginTask userLoginTask = null;
 
-	@Override
-	protected void onCreate(Bundle savedInstanceState) {
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
 
-		super.onCreate(savedInstanceState);
-		setContentView(R.layout.activity_login);
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_login);
 
-		emailView = (EditText) findViewById(R.id.email);
-		nameView = (EditText) findViewById(R.id.name);
-		passwordView = (EditText) findViewById(R.id.password);
-		loginFormView = findViewById(R.id.login_form);
-		progressView = findViewById(R.id.login_progress);
-		primaryActionButton = (Button) findViewById(R.id.primary_action_button);
-		secondaryActionButton = (Button) findViewById(R.id.secondary_action_button);
+        emailView = (EditText) findViewById(R.id.email);
+        nameView = (EditText) findViewById(R.id.name);
+        passwordView = (EditText) findViewById(R.id.password);
+        loginFormView = findViewById(R.id.login_form);
+        progressView = findViewById(R.id.login_progress);
+        primaryActionButton = (Button) findViewById(R.id.primary_action_button);
+        secondaryActionButton = (Button) findViewById(R.id.secondary_action_button);
 
-		passwordView.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+        passwordView.setOnEditorActionListener(new TextView.OnEditorActionListener() {
 
-			@Override
-			public boolean onEditorAction(TextView textView, int id, KeyEvent keyEvent) {
+            @Override
+            public boolean onEditorAction(TextView textView, int id, KeyEvent keyEvent) {
 
-				if (id == R.id.login || id == EditorInfo.IME_NULL) {
-					attemptLoginOrSignUp();
-					return true;
-				}
-				return false;
-			}
-		});
+                if (id == R.id.login || id == EditorInfo.IME_NULL) {
+                    attemptLoginOrSignUp();
+                    return true;
+                }
+                return false;
+            }
+        });
 
-		primaryActionButton.setOnClickListener(new OnClickListener() {
+        primaryActionButton.setOnClickListener(new OnClickListener() {
 
-			@Override
-			public void onClick(View view) {
+            @Override
+            public void onClick(View view) {
 
-				attemptLoginOrSignUp();
-			}
-		});
+                attemptLoginOrSignUp();
+            }
+        });
 
-		secondaryActionButton.setOnClickListener(new OnClickListener() {
+        secondaryActionButton.setOnClickListener(new OnClickListener() {
 
-			@Override
-			public void onClick(View view) {
+            @Override
+            public void onClick(View view) {
 
-				signUp = !signUp;
+                signUp = !signUp;
 
-				showSignUpFormToogle(signUp);
-			}
-		});
+                showSignUpFormToggle(signUp);
+            }
+        });
 
-	}
+    }
 
-	private void doSecondaryAction(boolean signUp) {
+    /**
+     * Attempts to sign in or register the account specified by the login form.
+     * If there are form errors (invalid email, missing fields, etc.), the
+     * errors are presented and no actual login attempt is made.
+     */
+    private void attemptLoginOrSignUp() {
 
-	}
+        boolean cancel = false;
+        View focusView = null;
 
-	/**
-	 * Attempts to sign in or register the account specified by the login form.
-	 * If there are form errors (invalid email, missing fields, etc.), the
-	 * errors are presented and no actual login attempt is made.
-	 */
-	private void attemptLoginOrSignUp() {
+        // Reset errors.
+        nameView.setError(null);
+        emailView.setError(null);
+        passwordView.setError(null);
 
-		// Reset errors.
-		emailView.setError(null);
-		passwordView.setError(null);
+        String name = nameView.getText().toString();
+        String email = emailView.getText().toString();
+        String password = passwordView.getText().toString();
 
-		// Store values at the time of the login attempt.
-		String email = emailView.getText().toString();
-		String password = passwordView.getText().toString();
-		String name = nameView.getText().toString();
+        if (TextUtils.isEmpty(password)) {
+            passwordView.setError(getString(R.string.error_field_required));
+            focusView = passwordView;
+            cancel = true;
+        }
 
-		boolean cancel = false;
-		View focusView = null;
+        if (TextUtils.isEmpty(email)) {
+            emailView.setError(getString(R.string.error_field_required));
+            focusView = emailView;
+            cancel = true;
+        } else if (!Validator.isEmailValid(email)) {
+            emailView.setError(getString(R.string.error_invalid_email));
+            focusView = emailView;
+            cancel = true;
+        }
 
-		if (TextUtils.isEmpty(password)) {
-			passwordView.setError(getString(R.string.error_field_required));
-			focusView = passwordView;
-			cancel = true;
-		}
+        if (signUp) {
 
-		if (TextUtils.isEmpty(email)) {
-			emailView.setError(getString(R.string.error_field_required));
-			focusView = emailView;
-			cancel = true;
-		} else if (!Validator.isEmailValid(email)) {
-			emailView.setError(getString(R.string.error_invalid_email));
-			focusView = emailView;
-			cancel = true;
-		}
+            if (TextUtils.isEmpty(name)) {
+                nameView.setError(getString(R.string.error_field_required));
+                focusView = nameView;
+                cancel = true;
+            }
 
-		if (signUp) {
+            if (!isPasswordValid(password)) {
 
-			if (TextUtils.isEmpty(name)) {
-				nameView.setError(getString(R.string.error_field_required));
-				focusView = nameView;
-				cancel = true;
-			}
+                passwordView.setError(getString(R.string.error_incorrect_password));
+                focusView = passwordView;
+                cancel = true;
+            }
+        }
 
-			if (!isPasswordValid(password)) {
+        if (cancel) {
 
-				passwordView.setError(getString(R.string.error_incorrect_password));
-				focusView = passwordView;
-				cancel = true;
-			}
-		}
+            focusView.requestFocus();
 
-		if (cancel) {
+        } else {
 
-			focusView.requestFocus();
+            AndroidUtil.hideSoftKeyboard(this);
 
-		} else {
+            if (AndroidUtil.isNetworkAvaliable(this)) {
 
-			AndroidUtil.hideSoftKeyboard(this);
+                showProgress(true);
 
-			showProgress(true);
+                if (signUp && Validator.isNull(signUpTask) && Validator.isNull(userLoginTask)) {
 
-			if (signUp) {
+                    signUpTask = new UserSignUpTask(this, name, email, password);
+                    signUpTask.execute((Void) null);
 
-				UserSignUpTask signUpTask = new UserSignUpTask(this, email, password);
-				signUpTask.execute((Void) null);
+                } else if (Validator.isNull(userLoginTask) && Validator.isNull(signUpTask)) {
 
-			} else {
+                    userLoginTask = new UserLoginTask(this, email, password);
+                    userLoginTask.execute((Void) null);
 
-				UserLoginTask userLoginTask = new UserLoginTask(this, email, password);
-				userLoginTask.execute((Void) null);
-			}
-		}
-	}
+                }
 
-	private boolean isPasswordValid(String password) {
+            } else {
 
-		// TODO: This method should be implement with the same password policy from http://public.mobilesupermarket.wedeploy.io/
-		return password.length() > 6;
-	}
+                DialogUtil.showAlertDialog(this, getString(R.string.error),
+                        getString(R.string.erro_no_internet_connection));
+            }
+        }
+    }
 
-	private boolean isAnimationAvailable() {
+    private boolean isPasswordValid(String password) {
 
-		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB_MR2) {
-			// On Honeycomb MR2 we have the ViewPropertyAnimator APIs, which allow
-			// for very easy animations. If available, use these APIs to animate
-			return true;
-		} else {
-			// The ViewPropertyAnimator APIs are not available, so simply show
-			// and hide the relevant UI components.
-			return false;
-		}
-	}
+        // TODO: This method should be implement with the same password policy from http://public.mobilesupermarket.wedeploy.io/
+        return password.length() >= 6 && !password.contains(StringPool.SPACE);
+    }
 
-	private void showSignUpFormToogle(boolean show) {
+    private boolean isAnimationAvailable() {
 
-		nameView.setVisibility(signUp ? View.VISIBLE : View.GONE);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB_MR2) {
+            return true;
+        } else {
+            return false;
+        }
+    }
 
-		if (signUp) {
-			nameView.requestFocus();
-		}
+    private void showSignUpFormToggle(boolean show) {
 
-		primaryActionButton.setText(signUp ? getString(R.string.action_register) : getString(R.string.action_login));
+        nameView.setText(StringPool.BLANK);
 
-		secondaryActionButton.setText(signUp ? getString(R.string.action_back) : getString(R.string.action_sign_up));
+        nameView.setVisibility(signUp ? View.VISIBLE : View.GONE);
 
-	}
+        if (signUp) {
+            nameView.requestFocus();
+        }
 
-	/**
-	 * Shows the progress UI and hides the login form.
-	 */
-	@TargetApi(Build.VERSION_CODES.HONEYCOMB_MR2)
-	private void showProgress(final boolean show) {
+        primaryActionButton.setText(signUp ? getString(R.string.action_register) : getString(R.string.action_login));
 
-		int shortAnimTime = getResources().getInteger(android.R.integer.config_mediumAnimTime);
+        secondaryActionButton.setText(signUp ? getString(R.string.action_back) : getString(R.string.action_sign_up));
 
-		if (isAnimationAvailable()) {
+    }
 
-			loginFormView	.animate()
-							.setDuration(shortAnimTime)
-							.alpha(show ? 0 : 1)
-							.setListener(new AnimatorListenerAdapter() {
+    /**
+     * Shows the progress UI and hides the login form.
+     */
+    @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR2)
+    private void showProgress(final boolean show) {
 
-								@Override
-								public void onAnimationEnd(Animator animation) {
+        int shortAnimTime = getResources().getInteger(android.R.integer.config_mediumAnimTime);
 
-									loginFormView.setVisibility(show ? View.GONE : View.VISIBLE);
-								}
-							});
+        if (isAnimationAvailable()) {
 
-			progressView.animate()
-						.setDuration(shortAnimTime)
-						.alpha(show ? 1 : 0)
-						.setListener(new AnimatorListenerAdapter() {
+            loginFormView.animate()
+                    .setDuration(shortAnimTime)
+                    .alpha(show ? 0 : 1)
+                    .setListener(new AnimatorListenerAdapter() {
 
-							@Override
-							public void onAnimationEnd(Animator animation) {
+                        @Override
+                        public void onAnimationEnd(Animator animation) {
 
-								progressView.setVisibility(show ? View.VISIBLE : View.GONE);
-							}
-						});
-		} else {
+                            loginFormView.setVisibility(show ? View.GONE : View.VISIBLE);
+                        }
+                    });
 
-			progressView.setVisibility(show ? View.VISIBLE : View.GONE);
-			loginFormView.setVisibility(show ? View.GONE : View.VISIBLE);
-		}
+            progressView.animate()
+                    .setDuration(shortAnimTime)
+                    .alpha(show ? 1 : 0)
+                    .setListener(new AnimatorListenerAdapter() {
 
-	}
+                        @Override
+                        public void onAnimationEnd(Animator animation) {
 
-	public void onLoginComplete(boolean success) {
+                            progressView.setVisibility(show ? View.VISIBLE : View.GONE);
+                        }
+                    });
+        } else {
 
-		showProgress(false);
+            progressView.setVisibility(show ? View.VISIBLE : View.GONE);
+            loginFormView.setVisibility(show ? View.GONE : View.VISIBLE);
+        }
 
-		if (success) {
+    }
 
-			Intent intent = new Intent(getApplicationContext(), ItemListActivity.class);
-			startActivity(intent);
+    public void onSignUpComplete(boolean success, JSONObject jsonResponse) {
 
-			finish();
-		} else {
-			passwordView.setError(getString(R.string.error_incorrect_password));
-			passwordView.requestFocus();
-		}
-	}
+        showProgress(false);
 
-	public void onLoginCanceled() {
+        try {
 
-		showProgress(false);
-	}
+            if (success) {
+
+                successfulSignUp(jsonResponse);
+
+            } else {
+
+                unsuccessfulSignUp(jsonResponse);
+            }
+
+        } catch (SignUpException e) {
+
+            DialogUtil.showAlertDialog(this, getString(R.string.error), e.getMessage());
+
+        } finally {
+
+            signUpTask = null;
+        }
+
+    }
+
+    private void successfulSignUp(JSONObject jsonResponse) throws SignUpException {
+
+        String name = StringPool.BLANK;
+        String email = StringPool.BLANK;
+        String strCreatedDate = StringPool.BLANK;
+        Date createdDate = null;
+
+        try {
+
+            name = jsonResponse.getString(Constants.NAME);
+            email = jsonResponse.getString(Constants.EMAIL);
+            strCreatedDate = jsonResponse.getString(Constants.CREATED_AT);
+            createdDate = new Date(Long.valueOf(strCreatedDate));
+
+
+            if (!email.isEmpty()) {
+
+                DateFormat df = new SimpleDateFormat("MM/dd/yyyy HH:mm");
+                String msg = String.format(getString(R.string.successful_sign_up), name, df.format(createdDate));
+                DialogUtil.showAlertDialog(this, getString(R.string.info), msg);
+
+                emailView.requestFocus();
+                signUp = false;
+                showSignUpFormToggle(signUp);
+
+            } else {
+
+                throw new SignUpException(
+                        getString(R.string.error_unknown_error) + "\n" + getString(R.string.error_contact_administrator));
+            }
+
+        } catch (JSONException e) {
+            Log.e(TAG, e.getMessage());
+            throw new SignUpException(e.getMessage(), e);
+        }
+    }
+
+    private void unsuccessfulSignUp(JSONObject jsonResponse) throws SignUpException {
+
+        int statusCode = 0;
+        String statusMsg = StringPool.BLANK;
+
+        try {
+
+            statusCode = jsonResponse.getInt(Constants.STATUS_CODE);
+
+            if (statusCode != 0) {
+
+                JSONArray jsonArrayErrors = jsonResponse.getJSONArray(Constants.ERRORS);
+
+                StringBuilder sb = new StringBuilder(StringPool.NEW_LINE);
+                sb.append(getString(R.string.error_sign_up));
+
+                for (int i = 0; i < jsonArrayErrors.length(); i++) {
+
+                    JSONObject curJSON = jsonArrayErrors.getJSONObject(i);
+
+                    String reason = StringPool.BLANK;
+                    String msg = StringPool.BLANK;
+
+                    if (curJSON.has(Constants.REASON)) {
+                        reason = curJSON.getString(Constants.REASON);
+                    }
+
+                    if (curJSON.has(Constants.MESSAGE)) {
+                        msg = curJSON.getString(Constants.MESSAGE);
+                    }
+
+                    /* This message depends on server response, maybe some documentation will be useful here */
+                    sb.append(getString(R.string.reason_colon));
+                    sb.append(StringPool.NEW_LINE);
+                    sb.append(reason);
+                    sb.append(StringPool.SPACE);
+                    sb.append(msg);
+                }
+
+                statusMsg = sb.toString();
+
+            } else {
+
+                statusMsg = jsonResponse.getString(Constants.STATUS_MSG);
+                statusMsg += "\n" + getString(R.string.error_contact_administrator);
+            }
+
+            throw new SignUpException(statusMsg);
+
+        } catch (JSONException e) {
+            Log.e(TAG, e.getMessage());
+            throw new SignUpException(e.getMessage(), e);
+        }
+
+    }
+
+    public void onLoginComplete(boolean success, JSONObject jsonResponse) {
+
+        showProgress(false);
+
+        try {
+
+            if (success) {
+
+                successfulLogin(jsonResponse);
+
+            } else {
+
+                unsuccessfulLogin(jsonResponse);
+            }
+
+        } catch (LoginException e) {
+
+            DialogUtil.showAlertDialog(this, getString(R.string.error), e.getMessage());
+
+        } finally {
+
+            userLoginTask = null;
+        }
+    }
+
+    private void successfulLogin(JSONObject jsonResponse) throws LoginException {
+
+        String email = emailView.getText().toString();
+
+        String accessToken = StringPool.BLANK;
+        String tokenType = StringPool.BLANK;
+
+        try {
+
+            accessToken = jsonResponse.getString(Constants.ACCESS_TOKEN);
+            tokenType = jsonResponse.getString(Constants.TOKEN_TYPE);
+
+            if (!accessToken.isEmpty()) {
+
+                Token token = new TokenImpl(accessToken, tokenType);
+                User user = new UserImpl(email, email, token);
+
+                Intent intent = new Intent(getApplicationContext(), ItemListActivity.class);
+                intent.putExtra(user.getClass().getName(), user);
+
+                startActivity(intent);
+
+                finish();
+
+            } else {
+
+                throw new LoginException(
+                        getString(R.string.error_unknown_error) + "\n" + getString(R.string.error_contact_administrator));
+            }
+
+        } catch (JSONException e) {
+            Log.e(TAG, e.getMessage());
+            throw new LoginException(e.getMessage(), e);
+        }
+    }
+
+    private void unsuccessfulLogin(JSONObject jsonResponse) throws LoginException {
+
+        int statusCode = 0;
+        String statusMsg = StringPool.BLANK;
+
+        try {
+
+            statusCode = jsonResponse.getInt(Constants.STATUS_CODE);
+
+            if (statusCode != 0) {
+
+                statusMsg = jsonResponse.getString(Constants.ERROR_DESCRIPTION);
+
+				/*
+                 * FIX:
+				 * Server response for Invalid user credentials should be 404 instead 400
+				 * {"error_description":"Invalid user credentials","error":"invalid_request","statusCode":400,"statusMsg":"Bad request"}
+				 */
+                emailView.setError(getString(R.string.error_invalid_credentials));
+                passwordView.setError(getString(R.string.error_invalid_credentials));
+
+            } else {
+
+                statusMsg = jsonResponse.getString(Constants.STATUS_MSG);
+                statusMsg += "\n" + getString(R.string.error_contact_administrator);
+                throw new LoginException(statusMsg);
+            }
+
+        } catch (JSONException e) {
+            Log.e(TAG, e.getMessage());
+            throw new LoginException(e.getMessage(), e);
+        }
+
+    }
+
+    public void onSignUpCanceled() {
+
+        signUpTask = null;
+        showProgress(false);
+    }
+
+    public void onLoginCanceled() {
+
+        userLoginTask = null;
+        showProgress(false);
+    }
 }

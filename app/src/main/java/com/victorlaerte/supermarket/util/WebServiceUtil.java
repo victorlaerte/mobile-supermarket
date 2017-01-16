@@ -14,75 +14,44 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLEncoder;
-import java.security.cert.X509Certificate;
-import java.util.List;
 import java.util.Map;
-
-import javax.net.ssl.X509TrustManager;
-import javax.xml.parsers.ParserConfigurationException;
 
 import org.apache.commons.io.IOUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import android.net.Uri;
-import android.util.Pair;
-
 public class WebServiceUtil {
 
 	private static final String LOG_TAG = WebServiceUtil.class.getName();
-	private static final String SSL_PROTOCOL = "TLS";
 
-	private static InputStream readInputStream(String uri, HttpMethod httpMethod, Map<String, String> paramsMap)
-			throws MalformedURLException, IOException {
+	public static JSONObject readJSONResponse(String uri, HttpMethod httpMethod, Map<String, String> paramsMap)
+			throws MalformedURLException, IOException, JSONException {
+
+		JSONObject jsonObject = new JSONObject();
 
 		HttpURLConnection connection = null;
 
 		InputStream in = null;
 
+		String strResponse = StringPool.BLANK;
+
 		try {
-
-			/*
-			 * FIX: this workaround is to disable SSL certificate check, only for this test. This should me removed in production mode 
-			 *
-			
-			SSLContext sc = SSLContext.getInstance(SSL_PROTOCOL);
-			sc.init(null, new TrustManager[] { new TrustAllX509TrustManager() }, new java.security.SecureRandom());
-			HttpsURLConnection.setDefaultSSLSocketFactory(sc.getSocketFactory());
-			HttpsURLConnection.setDefaultHostnameVerifier(new HostnameVerifier() {
-			
-				public boolean verify(String string, SSLSession ssls) {
-			
-					return true;
-				}
-			});
-			*/
-			URL url = new URL(uri);
-
-			connection = (HttpURLConnection) url.openConnection();
-
-			connection.setReadTimeout(10000);
-			connection.setConnectTimeout(20000);
-			connection.setRequestMethod("POST");
-
-			connection.setRequestProperty("Content-type", "application/x-www-form-urlencoded");
-
-			connection.setDoInput(true);
-			connection.setDoOutput(true);
 
 			String query = StringPool.BLANK;
 
 			if (Validator.isNotNull(paramsMap) && !paramsMap.isEmpty()) {
 
-				Uri.Builder builder = new Uri.Builder();
-
-				for (Map.Entry<String, String> entry : paramsMap.entrySet()) {
-
-					builder.appendQueryParameter(entry.getKey(), entry.getValue());
-				}
-
-				query = builder.build().getEncodedQuery();
+				query = getQuery(paramsMap);
 			}
+
+			URL url = new URL(uri);
+
+			connection = (HttpURLConnection) url.openConnection();
+			connection.setRequestMethod(httpMethod.toString());
+			connection.setReadTimeout(10000);
+			connection.setConnectTimeout(20000);
+			connection.setDoInput(true);
+			connection.setDoOutput(true);
 
 			if (!query.isEmpty()) {
 
@@ -92,77 +61,57 @@ public class WebServiceUtil {
 
 				writer.write(query);
 				writer.flush();
-				writer.close();
 
-				os.close();
-
+				IOUtils.closeQuietly(writer);
+				IOUtils.closeQuietly(os);
 			}
 
 			connection.connect();
 
-			int status = connection.getResponseCode();
+			int statusCode = connection.getResponseCode();
+			String statusMsg = connection.getResponseMessage();
 
-			if (status == 200) {
+			// HTTP Response Success 
+			if (statusCode > 199 && statusCode < 300) {
 
 				in = connection.getInputStream();
 			} else {
 				in = connection.getErrorStream();
 			}
 
+			strResponse = IOUtils.toString(in, StringPool.UTF8);
+
+			jsonObject = new JSONObject(strResponse);
+
+			jsonObject.put(Constants.STATUS_CODE, statusCode);
+			jsonObject.put(Constants.STATUS_MSG, statusMsg);
+
 		} finally {
 
+			IOUtils.closeQuietly(in);
 			connection.disconnect();
-		}
-
-		return in;
-	}
-
-	private static String getQuery(List<Pair<String, String>> params) throws UnsupportedEncodingException {
-
-		StringBuilder result = new StringBuilder();
-		boolean first = true;
-
-		for (Pair<String, String> pair : params) {
-
-			if (first) {
-				first = false;
-			} else {
-				result.append(StringPool.AMPERSAND);
-			}
-
-			result.append(URLEncoder.encode(pair.first, StringPool.UTF8));
-			result.append(StringPool.EQUAL);
-			result.append(URLEncoder.encode(pair.second, StringPool.UTF8));
-		}
-
-		return result.toString();
-	}
-
-	public static JSONObject readJSONResponse(String uri, HttpMethod httpMethod, Map<String, String> paramsMap)
-			throws IOException, ParserConfigurationException, JSONException {
-
-		JSONObject jsonObject = new JSONObject();
-
-		try (InputStream in = readInputStream(uri, httpMethod, paramsMap)) {
-
-			String str = IOUtils.toString(in, StringPool.UTF8);
-
-			jsonObject = new JSONObject(str);
 		}
 
 		return jsonObject;
 	}
 
-	private static class TrustAllX509TrustManager implements X509TrustManager {
+	private static String getQuery(Map<String, String> paramsMap) throws UnsupportedEncodingException {
 
-		public X509Certificate[] getAcceptedIssuers() {
+		StringBuilder sb = new StringBuilder();
 
-			return new X509Certificate[0];
+		for (Map.Entry<String, String> entry : paramsMap.entrySet()) {
+
+			sb.append(URLEncoder.encode(entry.getKey(), StringPool.UTF8));
+			sb.append(StringPool.EQUAL);
+			sb.append(URLEncoder.encode(entry.getValue(), StringPool.UTF8));
+			sb.append(StringPool.AMPERSAND);
 		}
 
-		public void checkClientTrusted(java.security.cert.X509Certificate[] certs, String authType) {}
+		if (sb.length() > 0) {
+			sb.setLength(sb.length() - 1);
+		}
 
-		public void checkServerTrusted(java.security.cert.X509Certificate[] certs, String authType) {}
-
+		return sb.toString();
 	}
+
 }

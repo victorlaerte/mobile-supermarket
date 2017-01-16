@@ -4,19 +4,16 @@ package com.victorlaerte.supermarket.service;
  * Created by victoroliveira on 12/01/17.
  */
 
-import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.xml.parsers.ParserConfigurationException;
-
-import org.json.JSONException;
 import org.json.JSONObject;
 
+import com.victorlaerte.supermarket.util.AndroidUtil;
 import com.victorlaerte.supermarket.util.Constants;
 import com.victorlaerte.supermarket.util.HttpMethod;
-import com.victorlaerte.supermarket.util.StringPool;
+import com.victorlaerte.supermarket.util.JSONUtil;
 import com.victorlaerte.supermarket.util.Validator;
 import com.victorlaerte.supermarket.util.WebServiceUtil;
 import com.victorlaerte.supermarket.view.LoginActivity;
@@ -34,6 +31,7 @@ public class UserLoginTask extends AsyncTask<Void, Void, Boolean> {
 	private final String password;
 	private WeakReference<LoginActivity> wLoginActivity;
 	private String url = Constants.LOGIN_BASE_URL + Constants.LOGIN_AUTH_ENDPOINT;
+	private JSONObject jsonResponse;
 
 	public UserLoginTask(LoginActivity loginActivity, String email, String password) {
 
@@ -47,28 +45,27 @@ public class UserLoginTask extends AsyncTask<Void, Void, Boolean> {
 
 		Map<String, String> httpParams = new HashMap<String, String>();
 
-		httpParams.put(StringPool.USERNAME, email);
-		httpParams.put(StringPool.PASSWORD, password);
-		httpParams.put("grant_type", StringPool.PASSWORD);
+		httpParams.put(Constants.USERNAME, email);
+		httpParams.put(Constants.PASSWORD, password);
+		httpParams.put(Constants.GRANT_TYPE, Constants.PASSWORD);
 
 		try {
 
-			JSONObject response = WebServiceUtil.readJSONResponse(url, HttpMethod.POST, httpParams);
+			jsonResponse = WebServiceUtil.readJSONResponse(url, HttpMethod.POST, httpParams);
 
-			Log.d(TAG, response.toString());
+			Log.d(TAG, jsonResponse.toString());
 
-		} catch (IOException e) {
-			e.printStackTrace();
-			return false;
-		} catch (ParserConfigurationException e) {
-			e.printStackTrace();
-			return false;
-		} catch (JSONException e) {
-			e.printStackTrace();
-			return false;
+			if (jsonResponse.getInt(Constants.STATUS_CODE) == 200) {
+
+				return true;
+			}
+
+		} catch (Exception e) {
+
+			jsonResponse = JSONUtil.createJSONErrorResponseHTTPLike(e);
 		}
 
-		return true;
+		return false;
 	}
 
 	@Override
@@ -78,7 +75,7 @@ public class UserLoginTask extends AsyncTask<Void, Void, Boolean> {
 
 		if (Validator.isNotNull(loginActivity)) {
 
-			loginActivity.onLoginComplete(success);
+			loginActivity.onLoginComplete(success, jsonResponse);
 		}
 	}
 
@@ -92,4 +89,5 @@ public class UserLoginTask extends AsyncTask<Void, Void, Boolean> {
 			loginActivity.onLoginCanceled();
 		}
 	}
+
 }
