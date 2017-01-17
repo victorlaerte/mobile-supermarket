@@ -1,10 +1,13 @@
 package com.victorlaerte.supermarket.view;
 
+import java.util.List;
+
 import com.victorlaerte.supermarket.R;
-import com.victorlaerte.supermarket.model.ProductStockContent;
+import com.victorlaerte.supermarket.model.MarketItem;
+import com.victorlaerte.supermarket.model.TypeFilter;
 import com.victorlaerte.supermarket.model.User;
 import com.victorlaerte.supermarket.model.impl.UserImpl;
-import com.victorlaerte.supermarket.service.GetProductsTask;
+import com.victorlaerte.supermarket.service.GetMarketItemsTask;
 import com.victorlaerte.supermarket.util.AndroidUtil;
 import com.victorlaerte.supermarket.util.DialogUtil;
 import com.victorlaerte.supermarket.util.StringPool;
@@ -84,8 +87,8 @@ public class ItemListActivity extends AppCompatActivity {
 
 			showProgress(true);
 
-			GetProductsTask getProductsTask = new GetProductsTask(this, user);
-			getProductsTask.execute((Void) null);
+			GetMarketItemsTask getMarketItemsTask = new GetMarketItemsTask(this, user, null);
+			getMarketItemsTask.execute((Void) null);
 
 		} else {
 
@@ -94,7 +97,7 @@ public class ItemListActivity extends AppCompatActivity {
 		}
 	}
 
-	public void setupRecyclerView(boolean sucess, String errorMsg, ProductStockContent productStockContent) {
+	public void setupRecyclerView(boolean sucess, String errorMsg, List<MarketItem> marketItemList) {
 
 		View view = findViewById(R.id.item_list);
 
@@ -106,8 +109,14 @@ public class ItemListActivity extends AppCompatActivity {
 
 			if (sucess) {
 
-				simpleItemRecyclerViewAdapter = new SimpleItemRecyclerViewAdapter(ItemListActivity.this,
-						productStockContent.getItemList(), twoPane);
+				if (Validator.isNull(simpleItemRecyclerViewAdapter)) {
+
+					simpleItemRecyclerViewAdapter = new SimpleItemRecyclerViewAdapter(ItemListActivity.this,
+							marketItemList, twoPane);
+				} else {
+
+					simpleItemRecyclerViewAdapter.activeTypeFilter(marketItemList);
+				}
 
 				recyclerView.setAdapter(simpleItemRecyclerViewAdapter);
 
@@ -180,8 +189,54 @@ public class ItemListActivity extends AppCompatActivity {
 
 			logout();
 			return true;
+
+		} else if (id == R.id.filter_no_filter) {
+
+			if (Validator.isNotNull(simpleItemRecyclerViewAdapter)) {
+				simpleItemRecyclerViewAdapter.deactivateTypeFilter();
+			}
+
+			return true;
+		} else if (id == R.id.filter_bakery) {
+
+			filterMarketItemList(TypeFilter.BAKERY);
+			return true;
+		} else if (id == R.id.filter_dairy) {
+
+			filterMarketItemList(TypeFilter.DAIRY);
+			return true;
+		} else if (id == R.id.filter_fruit) {
+
+			filterMarketItemList(TypeFilter.FRUIT);
+			return true;
+		} else if (id == R.id.filter_vegetable) {
+
+			filterMarketItemList(TypeFilter.VEGETABLE);
+			return true;
+		} else if (id == R.id.filter_meat) {
+
+			filterMarketItemList(TypeFilter.MEAT);
+			return true;
 		}
 		return super.onOptionsItemSelected(item);
+	}
+
+	private void filterMarketItemList(TypeFilter typeFilter) {
+
+		if (AndroidUtil.isNetworkAvaliable(getApplicationContext())) {
+
+			showProgress(true);
+
+			GetMarketItemsTask getMarketItemsTask = new GetMarketItemsTask(this, user, typeFilter);
+			getMarketItemsTask.execute((Void) null);
+
+		} else {
+
+			if (Validator.isNotNull(simpleItemRecyclerViewAdapter)) {
+
+				simpleItemRecyclerViewAdapter.activeOfflineTypeFilter(typeFilter);
+			}
+		}
 	}
 
 	private void logout() {
@@ -193,9 +248,9 @@ public class ItemListActivity extends AppCompatActivity {
 		SharedPreferences.Editor edit = preferences.edit();
 
 		edit.clear();
-		boolean commited = edit.commit();
+		boolean committed = edit.commit();
 
-		if (commited) {
+		if (committed) {
 
 			Intent intent = new Intent(getApplicationContext(), LoginActivity.class);
 			startActivity(intent);

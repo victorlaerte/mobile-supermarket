@@ -52,6 +52,11 @@ public class WebServiceUtil {
 				query = getQuery(paramsMap);
 			}
 
+			if (!query.isEmpty() && !httpMethod.equals(HttpMethod.POST)) {
+
+				uri += StringPool.QUESTION + query;
+			}
+
 			URL url = new URL(uri);
 
 			connection = (HttpURLConnection) url.openConnection();
@@ -72,7 +77,7 @@ public class WebServiceUtil {
 				connection.setDoOutput(true);
 			}
 
-			if (!query.isEmpty()) {
+			if (!query.isEmpty() && httpMethod.equals(HttpMethod.POST)) {
 
 				OutputStream os = connection.getOutputStream();
 
@@ -83,6 +88,7 @@ public class WebServiceUtil {
 
 				IOUtils.closeQuietly(writer);
 				IOUtils.closeQuietly(os);
+
 			}
 
 			connection.connect();

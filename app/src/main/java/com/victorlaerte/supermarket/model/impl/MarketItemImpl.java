@@ -3,7 +3,7 @@ package com.victorlaerte.supermarket.model.impl;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.victorlaerte.supermarket.model.CartItem;
+import com.victorlaerte.supermarket.model.MarketItem;
 
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -12,7 +12,7 @@ import android.os.Parcelable;
  * Created by victoroliveira on 16/01/17.
  */
 
-public class CartItemImpl implements CartItem {
+public class MarketItemImpl implements MarketItem {
 
 	private String id;
 	private String title;
@@ -24,8 +24,8 @@ public class CartItemImpl implements CartItem {
 	private int width;
 	private int height;
 
-	public CartItemImpl(String id, String title, String description, String type, double price, int rating,
-			String imageFileName, int width, int height) {
+	public MarketItemImpl(String id, String title, String description, String type, double price, int rating,
+						  String imageFileName, int width, int height) {
 		this.id = id;
 		this.title = title;
 		this.description = description;
@@ -37,7 +37,7 @@ public class CartItemImpl implements CartItem {
 		this.height = height;
 	}
 
-	public CartItemImpl(JSONObject json) throws JSONException {
+	public MarketItemImpl(JSONObject json) throws JSONException {
 
 		fill(json);
 	}
@@ -120,22 +120,22 @@ public class CartItemImpl implements CartItem {
 		dest.writeInt(height);
 	}
 
-	public static final Parcelable.Creator<CartItemImpl> CREATOR = new Parcelable.Creator<CartItemImpl>() {
+	public static final Parcelable.Creator<MarketItemImpl> CREATOR = new Parcelable.Creator<MarketItemImpl>() {
 
 		@Override
-		public CartItemImpl createFromParcel(Parcel in) {
+		public MarketItemImpl createFromParcel(Parcel in) {
 
-			return new CartItemImpl(in);
+			return new MarketItemImpl(in);
 		}
 
 		@Override
-		public CartItemImpl[] newArray(int size) {
+		public MarketItemImpl[] newArray(int size) {
 
-			return new CartItemImpl[size];
+			return new MarketItemImpl[size];
 		}
 	};
 
-	private CartItemImpl(Parcel in) {
+	private MarketItemImpl(Parcel in) {
 
 		id = in.readString();
 		title = in.readString();

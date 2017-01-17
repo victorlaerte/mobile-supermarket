@@ -36,5 +36,12 @@
     <string name="price_colon">Price:</string>
     <string name="description_colon">Description:</string>
     <string name="search">Search</string>
+    <string name="filter_by">Filter by</string>
+    <string name="filter_no_filter">No Filter</string>
+    <string name="filter_bakery">Bakery</string>
+    <string name="filter_dairy">Dairy</string>
+    <string name="filter_fruit">Fruit</string>
+    <string name="filter_vegetable">Vegetable</string>
+    <string name="filter_meat">Meat</string>
 
 </resources>

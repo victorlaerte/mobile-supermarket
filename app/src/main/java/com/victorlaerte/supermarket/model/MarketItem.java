@@ -6,7 +6,7 @@ import android.os.Parcelable;
  * Created by victoroliveira on 16/01/17.
  */
 
-public interface CartItem extends Parcelable {
+public interface MarketItem extends Parcelable {
 
 	public String getId();
 

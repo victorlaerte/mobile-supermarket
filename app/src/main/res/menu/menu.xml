@@ -10,6 +10,32 @@
         com.victorlaerte.supermarket:showAsAction="always" />
 
     <item
+        android:id="@+id/filter"
+        android:title="@string/filter_by">
+
+        <menu>
+            <item
+                android:id="@+id/filter_no_filter"
+                android:title="@string/filter_no_filter" />
+            <item
+                android:id="@+id/filter_bakery"
+                android:title="@string/filter_bakery" />
+            <item
+                android:id="@+id/filter_dairy"
+                android:title="@string/filter_dairy" />
+            <item
+                android:id="@+id/filter_fruit"
+                android:title="@string/filter_fruit" />
+            <item
+                android:id="@+id/filter_vegetable"
+                android:title="@string/filter_vegetable" />
+            <item
+                android:id="@+id/filter_meat"
+                android:title="@string/filter_meat" />
+        </menu>
+    </item>
+
+    <item
         android:id="@+id/logout"
         android:icon="@mipmap/ic_leave"
         android:title="@string/logout"

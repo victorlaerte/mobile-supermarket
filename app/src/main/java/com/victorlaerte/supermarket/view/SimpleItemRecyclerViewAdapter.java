@@ -7,7 +7,8 @@ import org.apache.commons.lang3.StringUtils;
 
 import com.squareup.picasso.Picasso;
 import com.victorlaerte.supermarket.R;
-import com.victorlaerte.supermarket.model.CartItem;
+import com.victorlaerte.supermarket.model.MarketItem;
+import com.victorlaerte.supermarket.model.TypeFilter;
 import com.victorlaerte.supermarket.util.Constants;
 
 import android.content.Context;
@@ -28,17 +29,19 @@ import android.widget.TextView;
 
 public class SimpleItemRecyclerViewAdapter extends RecyclerView.Adapter<SimpleItemRecyclerViewAdapter.ViewHolder> {
 
-	private final List<CartItem> cartItemListNotFiltered = new ArrayList<CartItem>();
-	private final List<CartItem> cartItemList;
+	private final List<MarketItem> marketItemListNotFiltered = new ArrayList<MarketItem>();
+	private List<MarketItem> marketItemList;
 	private final ItemListActivity activity;
 	private boolean twoPane;
+	private boolean isTypeFilterActive;
 
-	public SimpleItemRecyclerViewAdapter(ItemListActivity context, List<CartItem> items, boolean twoPane) {
+	public SimpleItemRecyclerViewAdapter(ItemListActivity context, List<MarketItem> items, boolean twoPane) {
 
-		this.cartItemListNotFiltered.addAll(items);
-		this.cartItemList = items;
+		this.marketItemListNotFiltered.addAll(items);
+		this.marketItemList = items;
 		this.activity = context;
 		this.twoPane = twoPane;
+		this.isTypeFilterActive = isTypeFilterActive;
 	}
 
 	@Override
@@ -51,24 +54,25 @@ public class SimpleItemRecyclerViewAdapter extends RecyclerView.Adapter<SimpleIt
 	@Override
 	public void onBindViewHolder(final ViewHolder holder, int position) {
 
-		holder.mItem = cartItemList.get(position);
+		holder.mItem = marketItemList.get(position);
 
-		String url = Constants.PUBLIC_BASE_URL + Constants.IMAGES_ENDPOINT + cartItemList	.get(position)
+		String url = Constants.PUBLIC_BASE_URL + Constants.IMAGES_ENDPOINT + marketItemList	.get(position)
 																							.getImageFileName();
 
 		int width = (int) activity.getResources().getDimension(R.dimen.small_image_width);
 		int height = (int) activity.getResources().getDimension(R.dimen.small_image_height);
 		Picasso.with(holder.mView.getContext()).load(url).resize(width, height).into(holder.imageView);
-		holder.mContentView.setText(cartItemList.get(position).getTitle());
 
 		if (!twoPane && activity.getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
 
-			int maxLength = 28;
-			holder.price.setFilters(new InputFilter[] { new InputFilter.LengthFilter(maxLength) });
+			int maxLength = 31;
+			holder.mContentView.setFilters(new InputFilter[] { new InputFilter.LengthFilter(maxLength) });
 		}
 
+		holder.mContentView.setText(marketItemList.get(position).getTitle());
+
 		holder.price.setText(
-				activity.getString(R.string.currency_symbol) + String.valueOf(cartItemList.get(position).getPrice()));
+				activity.getString(R.string.currency_symbol) + String.valueOf(marketItemList.get(position).getPrice()));
 
 		holder.mView.setOnClickListener(new View.OnClickListener() {
 
@@ -102,28 +106,65 @@ public class SimpleItemRecyclerViewAdapter extends RecyclerView.Adapter<SimpleIt
 	@Override
 	public int getItemCount() {
 
-		return cartItemList.size();
+		return marketItemList.size();
+	}
+
+	public void activeTypeFilter(List<MarketItem> filteredMarketItemList) {
+
+		isTypeFilterActive = true;
+
+		marketItemList.clear();
+		marketItemList.addAll(filteredMarketItemList);
+
+		notifyDataSetChanged();
+	}
+
+	public void activeOfflineTypeFilter(TypeFilter typeFilter) {
+
+		isTypeFilterActive = true;
+
+		marketItemList.clear();
+
+		for (MarketItem item : marketItemListNotFiltered) {
+
+			if (item.getType().equals(typeFilter.getLabel())) {
+
+				marketItemList.add(item);
+			}
+		}
+
+		notifyDataSetChanged();
+	}
+
+	public void deactivateTypeFilter() {
+
+		isTypeFilterActive = false;
+
+		marketItemList.clear();
+		marketItemList.addAll(marketItemListNotFiltered);
+
+		notifyDataSetChanged();
 	}
 
 	public void filter(String text) {
 
-		cartItemList.clear();
+		marketItemList.clear();
 
 		if (text.isEmpty()) {
 
-			cartItemList.addAll(cartItemListNotFiltered);
+			marketItemList.addAll(marketItemListNotFiltered);
 
 		} else {
 
 			text = text.toLowerCase();
 
-			for (CartItem item : cartItemListNotFiltered) {
+			for (MarketItem item : marketItemListNotFiltered) {
 
 				// @formatter:off
 				if (StringUtils.stripAccents(item.getTitle().toLowerCase()).contains(StringUtils.stripAccents(text)) || 
 					StringUtils	.stripAccents(item.getDescription().toLowerCase()).contains(StringUtils.stripAccents(text))) {
 
-					cartItemList.add(item);
+					marketItemList.add(item);
 				}
 				// @formatter:on
 
@@ -138,7 +179,7 @@ public class SimpleItemRecyclerViewAdapter extends RecyclerView.Adapter<SimpleIt
 		public final ImageView imageView;
 		public final TextView mContentView;
 		public final TextView price;
-		public CartItem mItem;
+		public MarketItem mItem;
 
 		public ViewHolder(View view) {
 			super(view);
@@ -146,12 +187,6 @@ public class SimpleItemRecyclerViewAdapter extends RecyclerView.Adapter<SimpleIt
 			imageView = (ImageView) view.findViewById(R.id.small_image);
 			mContentView = (TextView) view.findViewById(R.id.content);
 			price = (TextView) view.findViewById(R.id.price);
-		}
-
-		@Override
-		public String toString() {
-
-			return super.toString() + " '" + mContentView.getText() + "'";
 		}
 	}
 }

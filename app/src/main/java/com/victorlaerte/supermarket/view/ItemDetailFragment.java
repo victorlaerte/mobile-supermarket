@@ -2,7 +2,7 @@ package com.victorlaerte.supermarket.view;
 
 import com.squareup.picasso.Picasso;
 import com.victorlaerte.supermarket.R;
-import com.victorlaerte.supermarket.model.CartItem;
+import com.victorlaerte.supermarket.model.MarketItem;
 import com.victorlaerte.supermarket.util.Constants;
 
 import android.app.Activity;
@@ -24,7 +24,7 @@ import android.widget.TextView;
  */
 public class ItemDetailFragment extends Fragment {
 
-	private CartItem mItem;
+	private MarketItem mItem;
 
 	/**
 	 * Mandatory empty constructor for the fragment manager to instantiate the
