@@ -7,7 +7,7 @@ O Mobile Supermarket (http://public.mobilesupermarket.wedeploy.io/) é uma aplic
 O app deve fornecer uma lista de itens que podem ser adquiridos pelo usuário e deve ser possível mostrar os detalhes disponíveis do produto, em uma tela separada. Para tornar mais fácil encontrar o que está buscando, o usuário é capaz de filtrar a lista de produtos pelo seu tipo (Bakery, Dairy, Fruit, Vegetable, Meat). O usuário também deve ser capaz de adicionar e visualizar produtos no carrinho.
 
 Requisitos obrigatórios:
-*	O app deve funcionar em landscape e portrait
+* O app deve funcionar em landscape e portrait
 * Exibir a lista de produtos disponíveis
 * Deve existir uma tela a parte para mostrar os detalhes do produto (descrição, rating, imagem em maior escala, valor)
 * Adicionar , listar e remover produtos do carrinho. Não é necessário implementar o checkout.
@@ -41,13 +41,20 @@ Endpoint | /oauth/token
 Método | POST
 Parâmetros | username: String <br>password: String<br>grant_type: "password"
 
+* Carregar usuário logado: (é necessário passar o token de autenticação, como descrito na próxima seção) 
+
+Nome | Descrição 
+------------ | ------------ 
+Endpoint | /user
+Método | GET
+
 ##	Acesso aos produtos e carrinho
 O acesso aos dados do Mobile Supermarket é feito através da url data.mobilesupermarket.wedeploy.io. Para efetuar qualquer operação sobre os dados, é necessário estar logado. Uma vez logado, o token de acesso deve ser enviado no campo "Authorization" do header de cada request, cujo valor é "Bearer [access_token]".
 
 * Listar todos os produtos: GET /products
 * Filtrar produtos: GET /products?filter={"field":"value"}
-O json {"field":"value"} deve estar codificado para que a request funcione corretamente. Por exemplo, para o filtro "{"type":"fruit"}", a request deve ser:
-/products?filter=%7B%22type%22%3A%22fruit%22%7D
+O json {"field":"value"} deve estar codificado para que a request funcione corretamente. Por exemplo, para o filtro "{"type":"fruit"}", a request deve ser: /products?filter=%7B%22type%22%3A%22fruit%22%7D
+
 * Listar produtos do carrinho: GET /cart
 * Salvar produtos no carrinho: 
 
