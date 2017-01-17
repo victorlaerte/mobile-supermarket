@@ -13,4 +13,5 @@ public interface User extends Parcelable {
 	public String getEmail();
 
 	public Token getToken();
+
 }

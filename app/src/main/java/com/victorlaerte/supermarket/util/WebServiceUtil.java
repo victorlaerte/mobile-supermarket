@@ -17,8 +17,10 @@ import java.net.URLEncoder;
 import java.util.Map;
 
 import org.apache.commons.io.IOUtils;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.json.JSONTokener;
 
 public class WebServiceUtil {
 
@@ -26,6 +28,12 @@ public class WebServiceUtil {
 
 	public static JSONObject readJSONResponse(String uri, HttpMethod httpMethod, Map<String, String> paramsMap)
 			throws MalformedURLException, IOException, JSONException {
+
+		return readJSONResponse(uri, httpMethod, paramsMap, false, StringPool.BLANK);
+	}
+
+	public static JSONObject readJSONResponse(String uri, HttpMethod httpMethod, Map<String, String> paramsMap,
+			boolean basicAuth, String authString) throws MalformedURLException, IOException, JSONException {
 
 		JSONObject jsonObject = new JSONObject();
 
@@ -47,11 +55,22 @@ public class WebServiceUtil {
 			URL url = new URL(uri);
 
 			connection = (HttpURLConnection) url.openConnection();
+
+			if (basicAuth && Validator.isNotNull(authString) && !authString.isEmpty()) {
+
+				connection.setRequestProperty(Constants.AUTHORIZATION, authString);
+			}
+
 			connection.setRequestMethod(httpMethod.toString());
 			connection.setReadTimeout(10000);
 			connection.setConnectTimeout(20000);
 			connection.setDoInput(true);
-			connection.setDoOutput(true);
+			connection.setUseCaches(false);
+
+			if (httpMethod.equals(HttpMethod.POST)) {
+
+				connection.setDoOutput(true);
+			}
 
 			if (!query.isEmpty()) {
 
@@ -81,7 +100,16 @@ public class WebServiceUtil {
 
 			strResponse = IOUtils.toString(in, StringPool.UTF8);
 
-			jsonObject = new JSONObject(strResponse);
+			Object json = new JSONTokener(strResponse).nextValue();
+
+			if (json instanceof JSONObject) {
+
+				jsonObject.put(Constants.BODY, (JSONObject) json);
+
+			} else if (json instanceof JSONArray) {
+
+				jsonObject.put(Constants.BODY, (JSONArray) json);
+			}
 
 			jsonObject.put(Constants.STATUS_CODE, statusCode);
 			jsonObject.put(Constants.STATUS_MSG, statusMsg);
@@ -113,5 +141,25 @@ public class WebServiceUtil {
 
 		return sb.toString();
 	}
+
+	/*public static String read(String uri) throws MalformedURLException, IOException {
+	
+		URL url = new URL(uri);
+	
+		HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+	
+		connection.setRequestProperty("Request-Method", "GET");
+		connection.setRequestProperty("Authorization",
+				"Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJhdWQiOlsibW9iaWxlc3VwZXJtYXJrZXQiXSwic3ViIjoiMjAwNDc1MzA1NDQwMjE2MTIzIiwic2NvcGUiOltdLCJpc3MiOiJtb2JpbGVzdXBlcm1hcmtldC53ZWRlcGxveS5pbyIsIm5hbWUiOiJWaWN0b3IgTGFlcnRlIiwiaWF0IjoxNDg0NTg1NjY0LCJlbWFpbCI6InZpY3RvcmxhZXJ0ZWRvbGl2ZWlyYUBnbWFpbC5jb20iLCJwaWN0dXJlIjpudWxsLCJwcm92aWRlcnMiOnt9fQ==.K_fBuz1pzn0DOB_V4nbA6LJhKqOtWCtG4n02pqXnsfY=");
+		connection.setDoInput(true);
+		connection.setDoOutput(true);
+		connection.connect();
+	
+		InputStream in = connection.getInputStream();
+	
+		String s = IOUtils.toString(in, "UTF-8");
+	
+		return s;
+	}*/
 
 }

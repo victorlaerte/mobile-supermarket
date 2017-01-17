@@ -1,6 +1,10 @@
 package com.victorlaerte.supermarket.model.impl;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import com.victorlaerte.supermarket.model.Token;
+import com.victorlaerte.supermarket.util.Constants;
 import com.victorlaerte.supermarket.util.StringPool;
 
 import android.os.Parcel;
@@ -25,6 +29,17 @@ public class TokenImpl implements Token {
 	public TokenImpl(String accessToken, String tokenType) {
 
 		fill(accessToken, StringPool.BLANK, StringPool.BLANK, tokenType);
+	}
+
+	public TokenImpl(JSONObject json) throws JSONException {
+
+		fill(json);
+	}
+
+	private void fill(JSONObject json) throws JSONException {
+
+		fill(json.getString(Constants.ACCESS_TOKEN), json.getString(Constants.REFRESH_TOKEN),
+				json.getString(Constants.SCOPE), json.getString(Constants.TOKEN_TYPE));
 	}
 
 	public void fill(String accessToken, String refreshToken, String scope, String tokenType) {
@@ -96,5 +111,29 @@ public class TokenImpl implements Token {
 		refreshToken = in.readString();
 		scope = in.readString();
 		tokenType = in.readString();
+	}
+
+	@Override
+	public String toString() {
+
+		StringBuilder sb = new StringBuilder(StringPool.OPEN_CURLY_BRACE);
+		sb.append("\"" + Constants.ACCESS_TOKEN + "\"");
+		sb.append(StringPool.COLON);
+		sb.append("\"" + accessToken + "\"");
+		sb.append(StringPool.COMMA);
+		sb.append("\"" + Constants.REFRESH_TOKEN + "\"");
+		sb.append(StringPool.COLON);
+		sb.append("\"" + refreshToken + "\"");
+		sb.append(StringPool.COMMA);
+		sb.append("\"" + Constants.SCOPE + "\"");
+		sb.append(StringPool.COLON);
+		sb.append("\"" + scope + "\"");
+		sb.append(StringPool.COMMA);
+		sb.append("\"" + Constants.TOKEN_TYPE + "\"");
+		sb.append(StringPool.COLON);
+		sb.append("\"" + tokenType + "\"");
+		sb.append(StringPool.CLOSE_CURLY_BRACE);
+
+		return sb.toString();
 	}
 }

@@ -15,4 +15,5 @@ public interface Token extends Parcelable {
 	String getScope();
 
 	String getTokenType();
+
 }

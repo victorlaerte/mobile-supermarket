@@ -18,7 +18,6 @@ import com.victorlaerte.supermarket.util.WebServiceUtil;
 import com.victorlaerte.supermarket.view.LoginActivity;
 
 import android.os.AsyncTask;
-import android.util.Log;
 
 /**
  * Represents an asynchronous task used to register the user.
@@ -53,8 +52,6 @@ public class UserSignUpTask extends AsyncTask<Void, Void, Boolean> {
 		try {
 
 			jsonResponse = WebServiceUtil.readJSONResponse(url, HttpMethod.POST, httpParams);
-
-			Log.d(TAG, jsonResponse.toString());
 
 			if (jsonResponse.getInt(Constants.STATUS_CODE) == 200) {
 

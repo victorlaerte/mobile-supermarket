@@ -1,7 +1,9 @@
 package com.victorlaerte.supermarket.view;
 
+import com.squareup.picasso.Picasso;
 import com.victorlaerte.supermarket.R;
-import com.victorlaerte.supermarket.dummy.DummyContent;
+import com.victorlaerte.supermarket.model.CartItem;
+import com.victorlaerte.supermarket.util.Constants;
 
 import android.app.Activity;
 import android.os.Bundle;
@@ -10,6 +12,8 @@ import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
+import android.widget.RatingBar;
 import android.widget.TextView;
 
 /**
@@ -20,16 +24,7 @@ import android.widget.TextView;
  */
 public class ItemDetailFragment extends Fragment {
 
-	/**
-	 * The fragment argument representing the item ID that this fragment
-	 * represents.
-	 */
-	public static final String ARG_ITEM_ID = "item_id";
-
-	/**
-	 * The dummy content this fragment is presenting.
-	 */
-	private DummyContent.DummyItem mItem;
+	private CartItem mItem;
 
 	/**
 	 * Mandatory empty constructor for the fragment manager to instantiate the
@@ -42,16 +37,14 @@ public class ItemDetailFragment extends Fragment {
 
 		super.onCreate(savedInstanceState);
 
-		if (getArguments().containsKey(ARG_ITEM_ID)) {
-			// Load the dummy content specified by the fragment
-			// arguments. In a real-world scenario, use a Loader
-			// to load content from a content provider.
-			mItem = DummyContent.ITEM_MAP.get(getArguments().getString(ARG_ITEM_ID));
+		if (getArguments().containsKey(Constants.ITEM)) {
+
+			mItem = getArguments().getParcelable(Constants.ITEM);
 
 			Activity activity = this.getActivity();
 			CollapsingToolbarLayout appBarLayout = (CollapsingToolbarLayout) activity.findViewById(R.id.toolbar_layout);
 			if (appBarLayout != null) {
-				appBarLayout.setTitle(mItem.content);
+				appBarLayout.setTitle(mItem.getTitle());
 			}
 		}
 	}
@@ -63,7 +56,17 @@ public class ItemDetailFragment extends Fragment {
 
 		// Show the dummy content as text in a TextView.
 		if (mItem != null) {
-			((TextView) rootView.findViewById(R.id.item_detail)).setText(mItem.details);
+
+			String url = Constants.PUBLIC_BASE_URL + Constants.IMAGES_ENDPOINT + mItem.getImageFileName();
+
+			Picasso.with(getContext()).load(url).into((ImageView) rootView.findViewById(R.id.item_large_image));
+
+			((RatingBar) rootView.findViewById(R.id.rating_bar)).setRating(mItem.getRating());
+
+			((TextView) rootView.findViewById(R.id.item_price)).setText(
+					getString(R.string.currency_symbol) + mItem.getPrice());
+
+			((TextView) rootView.findViewById(R.id.item_description)).setText(mItem.getDescription());
 		}
 
 		return rootView;

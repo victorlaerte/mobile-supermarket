@@ -31,6 +31,7 @@ dependencies {
     compile 'org.apache.commons:commons-lang3:3.5'
     compile "commons-io:commons-io:+"
     compile group: 'commons-validator', name: 'commons-validator', version: '1.4.0'
+    compile 'com.squareup.picasso:picasso:2.5.2'
 
     testCompile 'junit:junit:4.12'
 }

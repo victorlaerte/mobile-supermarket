@@ -1,7 +1,12 @@
 package com.victorlaerte.supermarket.model.impl;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import com.victorlaerte.supermarket.model.Token;
 import com.victorlaerte.supermarket.model.User;
+import com.victorlaerte.supermarket.util.Constants;
+import com.victorlaerte.supermarket.util.StringPool;
 
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -19,6 +24,17 @@ public class UserImpl implements User {
 	public UserImpl(String userName, String email, Token token) {
 
 		fill(userName, email, token);
+	}
+
+	public UserImpl(JSONObject json) throws JSONException {
+
+		fill(json);
+	}
+
+	private void fill(JSONObject json) throws JSONException {
+
+		fill(json.getString(Constants.USERNAME), json.getString(Constants.EMAIL),
+				new TokenImpl(json.getJSONObject(Constants.TOKEN)));
 	}
 
 	public void fill(String userName, String email, Token token) {
@@ -80,5 +96,25 @@ public class UserImpl implements User {
 		userName = in.readString();
 		email = in.readString();
 		token = in.readParcelable(TokenImpl.class.getClassLoader());
+	}
+
+	@Override
+	public String toString() {
+
+		StringBuilder sb = new StringBuilder(StringPool.OPEN_CURLY_BRACE);
+		sb.append("\"" + Constants.USERNAME + "\"");
+		sb.append(StringPool.COLON);
+		sb.append("\"" + userName + "\"");
+		sb.append(StringPool.COMMA);
+		sb.append("\"" + Constants.EMAIL + "\"");
+		sb.append(StringPool.COLON);
+		sb.append("\"" + email + "\"");
+		sb.append(StringPool.COMMA);
+		sb.append("\"" + Constants.TOKEN + "\"");
+		sb.append(StringPool.COLON);
+		sb.append(token.toString());
+		sb.append(StringPool.CLOSE_CURLY_BRACE);
+
+		return sb.toString();
 	}
 }

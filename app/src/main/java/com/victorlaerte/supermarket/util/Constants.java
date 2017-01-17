@@ -6,25 +6,38 @@ package com.victorlaerte.supermarket.util;
 
 public interface Constants {
 
-	String HTTP_PREFIX = "http://";
-	String LOGIN_BASE_URL = HTTP_PREFIX + "auth.mobilesupermarket.wedeploy.io";
-	String SIGN_UP_ENDPOINT = "/users";
-	String LOGIN_AUTH_ENDPOINT = "/oauth/token";
+    String HTTP_PREFIX = "http://";
+    String LOGIN_BASE_URL = HTTP_PREFIX + "auth.mobilesupermarket.wedeploy.io";
+    String SIGN_UP_ENDPOINT = "/users";
+    String LOGIN_AUTH_ENDPOINT = "/oauth/token";
 
-	String ACCESS_TOKEN = "access_token";
-	String TOKEN_TYPE = "token_type";
-	String USERNAME = "username";
-	String NAME = "name";
-	String EMAIL = "email";
-	String PASSWORD = "password";
-	String GRANT_TYPE = "grant_type";
-	String CREATED_AT = "createdAt";
-	String STATUS_CODE = "statusCode";
-	String STATUS_MSG = "statusMsg";
-	String ERROR = "error";
-	String ERRORS = "errors";
-	String ERROR_DESCRIPTION = "error_description";
-	String REASON = "reason";
-	String MESSAGE = "message";
+    String DATA_BASE_URL = HTTP_PREFIX + "data.mobilesupermarket.wedeploy.io";
+    String GET_PRODUCTS_ENDPOINT = "/products";
+    String AUTHORIZATION = "Authorization";
 
+    String PUBLIC_BASE_URL = HTTP_PREFIX + "public.mobilesupermarket.wedeploy.io";
+    String IMAGES_ENDPOINT = "/assets/images/";
+
+    String ACCESS_TOKEN = "access_token";
+    String TOKEN_TYPE = "token_type";
+    String USERNAME = "username";
+    String USER = "user";
+    String NAME = "name";
+    String BODY = "body";
+    String EMAIL = "email";
+    String PASSWORD = "password";
+    String GRANT_TYPE = "grant_type";
+    String CREATED_AT = "createdAt";
+    String STATUS_CODE = "statusCode";
+    String STATUS_MSG = "statusMsg";
+    String ERROR = "error";
+    String ERRORS = "errors";
+    String ERROR_DESCRIPTION = "error_description";
+    String REASON = "reason";
+    String MESSAGE = "message";
+    String ITEM = "item";
+
+    String TOKEN = "token";
+    String REFRESH_TOKEN = "refresh_token";
+    String SCOPE = "scope";
 }

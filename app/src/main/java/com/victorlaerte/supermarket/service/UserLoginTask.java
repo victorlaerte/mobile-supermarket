@@ -10,7 +10,6 @@ import java.util.Map;
 
 import org.json.JSONObject;
 
-import com.victorlaerte.supermarket.util.AndroidUtil;
 import com.victorlaerte.supermarket.util.Constants;
 import com.victorlaerte.supermarket.util.HttpMethod;
 import com.victorlaerte.supermarket.util.JSONUtil;

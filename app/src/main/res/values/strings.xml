@@ -27,5 +27,14 @@
     <string name="prompt_password">Password</string>
     <string name="or">OR</string>
     <string name="successful_sign_up">User %1$s added successfully at %2$s. Please sign in.</string>
+    <string name="logout">Logout</string>
+
+    <!-- Strings related to list activity -->
+    <string name="shopping_cart">Shopping Cart</string>
+    <string name="item_added_to_cart">Item added to your cart</string>
+    <string name="currency_symbol">$</string>
+    <string name="price_colon">Price:</string>
+    <string name="description_colon">Description:</string>
+    <string name="search">Search</string>
 
 </resources>

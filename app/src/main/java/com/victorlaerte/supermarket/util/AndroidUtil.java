@@ -6,8 +6,11 @@ package com.victorlaerte.supermarket.util;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.res.Resources;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.os.Build;
+import android.util.DisplayMetrics;
 import android.view.inputmethod.InputMethodManager;
 
 public class AndroidUtil {
@@ -64,4 +67,36 @@ public class AndroidUtil {
 		inputMethodManager.hideSoftInputFromWindow(activity.getCurrentFocus().getWindowToken(),
 				InputMethodManager.HIDE_IMPLICIT_ONLY);
 	}
+
+	public static boolean isAnimationAvailable() {
+
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB_MR2) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	public static int convertDpToPixel(float dp, Context context) {
+
+		// Get the screen's density scale
+		final float scale = context.getResources().getDisplayMetrics().density;
+
+		// Convert the dps to pixels, based on density scale
+		int px = (int) (dp * scale + 0.5f);
+
+		return px;
+	}
+
+	public static float convertPixelsToDp(float px, Context context) {
+
+		Resources resources = context.getResources();
+
+		DisplayMetrics metrics = resources.getDisplayMetrics();
+
+		float dp = px / (metrics.densityDpi / 160f);
+
+		return dp;
+	}
+
 }
