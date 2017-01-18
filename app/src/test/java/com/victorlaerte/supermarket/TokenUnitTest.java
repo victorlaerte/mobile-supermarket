@@ -40,20 +40,6 @@ public class TokenUnitTest {
 	}
 
 	@Test
-	public void testParcelable() {
-
-		Token token = new TokenImpl(accessToken, refreshToken, scope, tokenType);
-
-		Parcel parcel = Parcel.obtain();
-		token.writeToParcel(parcel, 0);
-		parcel.setDataPosition(0);
-
-		Token parceledToken = TokenImpl.CREATOR.createFromParcel(parcel);
-
-		Assert.assertEquals(token, parceledToken);
-	}
-
-	@Test
 	public void testToString() {
 
 		Token token = new TokenImpl(accessToken, refreshToken, scope, tokenType);

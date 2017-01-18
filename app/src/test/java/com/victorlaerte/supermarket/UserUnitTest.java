@@ -5,8 +5,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.runners.MockitoJUnitRunner;
 
 import com.victorlaerte.supermarket.model.Token;
 import com.victorlaerte.supermarket.model.User;
@@ -14,11 +12,8 @@ import com.victorlaerte.supermarket.model.impl.TokenImpl;
 import com.victorlaerte.supermarket.model.impl.UserImpl;
 import com.victorlaerte.supermarket.util.Constants;
 
-import android.os.Parcel;
-
 import junit.framework.Assert;
 
-@RunWith(MockitoJUnitRunner.class)
 public class UserUnitTest {
 
 	private String id;
@@ -46,20 +41,6 @@ public class UserUnitTest {
 		userJSON.put(Constants.USERNAME, userName);
 		userJSON.put(Constants.EMAIL, email);
 		userJSON.put(Constants.TOKEN, new JSONObject(token.toString()));
-	}
-
-	@Test
-	public void testParcelable() {
-
-		User user = new UserImpl(id, name, userName, email, token);
-
-		Parcel parcel = Parcel.obtain();
-		user.writeToParcel(parcel, 0);
-		parcel.setDataPosition(0);
-
-		User parceledUser = UserImpl.CREATOR.createFromParcel(parcel);
-
-		Assert.assertEquals(user, parceledUser);
 	}
 
 	@Test

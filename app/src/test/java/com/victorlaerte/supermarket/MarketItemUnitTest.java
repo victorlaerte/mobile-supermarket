@@ -55,21 +55,6 @@ public class MarketItemUnitTest {
 	}
 
 	@Test
-	public void testParcelable() {
-
-		MarketItem marketItem = new MarketItemImpl(id, title, description, type, price, rating, filename, width,
-				height);
-
-		Parcel parcel = Parcel.obtain();
-		marketItem.writeToParcel(parcel, 0);
-		parcel.setDataPosition(0);
-
-		MarketItem parceledMarketItem = MarketItemImpl.CREATOR.createFromParcel(parcel);
-
-		Assert.assertEquals(marketItem, parceledMarketItem);
-	}
-
-	@Test
 	public void testToString() {
 
 		MarketItem marketItem = new MarketItemImpl(id, title, description, type, price, rating, filename, width,

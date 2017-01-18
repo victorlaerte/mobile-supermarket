@@ -13,11 +13,9 @@ import com.victorlaerte.supermarket.model.MarketItem;
 import com.victorlaerte.supermarket.model.impl.CartItemImpl;
 import com.victorlaerte.supermarket.model.impl.MarketItemImpl;
 
-import android.os.Parcel;
-
 import junit.framework.Assert;
 
-public class CartIUnitTest {
+public class CartUnitTest {
 
 	private List<CartItem> cartItemList;
 
@@ -36,22 +34,6 @@ public class CartIUnitTest {
 
 			cartItemList.add(cartItem);
 		}
-	}
-
-	@Test
-	public void testParcelable() {
-
-		_addItemsToCart();
-
-		Parcel parcel = Parcel.obtain();
-		Cart.getInstance().writeToParcel(parcel, 0);
-		parcel.setDataPosition(0);
-
-		Cart parceledCart = Cart.CREATOR.createFromParcel(parcel);
-
-		Assert.assertEquals(Cart.getInstance(), parceledCart);
-
-		Cart.getInstance().clear();
 	}
 
 	@Test
