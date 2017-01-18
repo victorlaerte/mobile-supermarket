@@ -1,8 +1,6 @@
 <resources>
     <string name="app_name">SuperMarket</string>
     <string name="title_item_detail">Item Detail</string>
-
-    <!-- Strings related to login -->
     <string name="action_sign_up">Sign up</string>
     <string name="action_login">Login</string>
     <string name="action_register">Register</string>
@@ -14,6 +12,7 @@
     <string name="error_invalid_password">This password is too short</string>
     <string name="error_incorrect_password">This password is incorrect</string>
     <string name="error_field_required">This field is required</string>
+    <string name="error_offline_mode">To use in offline mode, at least one online login is required</string>
     <string name="error_unknown_error">Unknown Error</string>
     <string name="error_contact_administrator">Please contact administrator</string>
     <string name="error_sign_up">Sign Up Error.</string>
@@ -28,9 +27,7 @@
     <string name="or">OR</string>
     <string name="successful_sign_up">User %1$s added successfully at %2$s. Please sign in.</string>
     <string name="logout">Logout</string>
-
-    <!-- Strings related to list activity -->
-    <string name="shopping_cart">Shopping Cart</string>
+    <string name="cart">Cart</string>
     <string name="item_added_to_cart">Item added to your cart</string>
     <string name="currency_symbol">$</string>
     <string name="price_colon">Price:</string>
@@ -43,5 +40,11 @@
     <string name="filter_fruit">Fruit</string>
     <string name="filter_vegetable">Vegetable</string>
     <string name="filter_meat">Meat</string>
+    <string name="cancel">Cancel</string>
+    <string name="checkout">Checkout</string>
+    <string name="checkout_done">Thanks for the purchase</string>
+    <string name="cart_empty">Your cart is empty</string>
+    <string name="adding_item_to_cart">adding to cart</string>
+    <string name="removing_item_from_cart">removing item from cart</string>
 
 </resources>

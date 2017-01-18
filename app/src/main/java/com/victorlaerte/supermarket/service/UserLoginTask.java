@@ -20,9 +20,6 @@ import com.victorlaerte.supermarket.view.LoginActivity;
 import android.os.AsyncTask;
 import android.util.Log;
 
-/**
- * Represents an asynchronous login task used to authenticate the user.
- */
 public class UserLoginTask extends AsyncTask<Void, Void, Boolean> {
 
 	private static final String TAG = UserLoginTask.class.getName();
@@ -54,7 +51,7 @@ public class UserLoginTask extends AsyncTask<Void, Void, Boolean> {
 
 			Log.d(TAG, jsonResponse.toString());
 
-			if (jsonResponse.getInt(Constants.STATUS_CODE) == 200) {
+			if (WebServiceUtil.isHttpSuccess(jsonResponse.getInt(Constants.STATUS_CODE))) {
 
 				return true;
 			}

@@ -9,14 +9,13 @@ import com.squareup.picasso.Picasso;
 import com.victorlaerte.supermarket.R;
 import com.victorlaerte.supermarket.model.MarketItem;
 import com.victorlaerte.supermarket.model.TypeFilter;
+import com.victorlaerte.supermarket.model.User;
 import com.victorlaerte.supermarket.util.Constants;
 
 import android.content.Context;
 import android.content.Intent;
-import android.content.res.Configuration;
 import android.os.Bundle;
 import android.support.v7.widget.RecyclerView;
-import android.text.InputFilter;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -32,14 +31,16 @@ public class SimpleItemRecyclerViewAdapter extends RecyclerView.Adapter<SimpleIt
 	private final List<MarketItem> marketItemListNotFiltered = new ArrayList<MarketItem>();
 	private List<MarketItem> marketItemList;
 	private final ItemListActivity activity;
+	private User user;
 	private boolean twoPane;
 	private boolean isTypeFilterActive;
 
-	public SimpleItemRecyclerViewAdapter(ItemListActivity context, List<MarketItem> items, boolean twoPane) {
+	public SimpleItemRecyclerViewAdapter(ItemListActivity context, List<MarketItem> items, User user, boolean twoPane) {
 
 		this.marketItemListNotFiltered.addAll(items);
 		this.marketItemList = items;
 		this.activity = context;
+		this.user = user;
 		this.twoPane = twoPane;
 		this.isTypeFilterActive = isTypeFilterActive;
 	}
@@ -62,12 +63,6 @@ public class SimpleItemRecyclerViewAdapter extends RecyclerView.Adapter<SimpleIt
 		int width = (int) activity.getResources().getDimension(R.dimen.small_image_width);
 		int height = (int) activity.getResources().getDimension(R.dimen.small_image_height);
 		Picasso.with(holder.mView.getContext()).load(url).resize(width, height).into(holder.imageView);
-
-		if (!twoPane && activity.getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
-
-			int maxLength = 31;
-			holder.mContentView.setFilters(new InputFilter[] { new InputFilter.LengthFilter(maxLength) });
-		}
 
 		holder.mContentView.setText(marketItemList.get(position).getTitle());
 
@@ -95,12 +90,18 @@ public class SimpleItemRecyclerViewAdapter extends RecyclerView.Adapter<SimpleIt
 					Context context = v.getContext();
 
 					Intent intent = new Intent(context, ItemDetailActivity.class);
+					intent.putExtra(Constants.USER, user);
 					intent.putExtra(Constants.ITEM, holder.mItem);
 
 					context.startActivity(intent);
 				}
 			}
 		});
+	}
+
+	public void setTwoPane(boolean twoPane) {
+
+		this.twoPane = twoPane;
 	}
 
 	@Override

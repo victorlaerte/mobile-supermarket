@@ -24,7 +24,7 @@ import org.json.JSONTokener;
 
 public class WebServiceUtil {
 
-	private static final String LOG_TAG = WebServiceUtil.class.getName();
+	private static final String TAG = WebServiceUtil.class.getName();
 
 	public static JSONObject readJSONResponse(String uri, HttpMethod httpMethod, Map<String, String> paramsMap)
 			throws MalformedURLException, IOException, JSONException {
@@ -70,7 +70,6 @@ public class WebServiceUtil {
 			connection.setReadTimeout(10000);
 			connection.setConnectTimeout(20000);
 			connection.setDoInput(true);
-			connection.setUseCaches(false);
 
 			if (httpMethod.equals(HttpMethod.POST)) {
 
@@ -97,7 +96,7 @@ public class WebServiceUtil {
 			String statusMsg = connection.getResponseMessage();
 
 			// HTTP Response Success 
-			if (statusCode > 199 && statusCode < 300) {
+			if (isHttpSuccess(statusCode)) {
 
 				in = connection.getInputStream();
 			} else {
@@ -106,15 +105,18 @@ public class WebServiceUtil {
 
 			strResponse = IOUtils.toString(in, StringPool.UTF8);
 
-			Object json = new JSONTokener(strResponse).nextValue();
+			if (strResponse.length() > 0) {
 
-			if (json instanceof JSONObject) {
+				Object json = new JSONTokener(strResponse).nextValue();
 
-				jsonObject.put(Constants.BODY, (JSONObject) json);
+				if (json instanceof JSONObject) {
 
-			} else if (json instanceof JSONArray) {
+					jsonObject.put(Constants.BODY, (JSONObject) json);
 
-				jsonObject.put(Constants.BODY, (JSONArray) json);
+				} else if (json instanceof JSONArray) {
+
+					jsonObject.put(Constants.BODY, (JSONArray) json);
+				}
 			}
 
 			jsonObject.put(Constants.STATUS_CODE, statusCode);
@@ -148,24 +150,13 @@ public class WebServiceUtil {
 		return sb.toString();
 	}
 
-	/*public static String read(String uri) throws MalformedURLException, IOException {
-	
-		URL url = new URL(uri);
-	
-		HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-	
-		connection.setRequestProperty("Request-Method", "GET");
-		connection.setRequestProperty("Authorization",
-				"Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJhdWQiOlsibW9iaWxlc3VwZXJtYXJrZXQiXSwic3ViIjoiMjAwNDc1MzA1NDQwMjE2MTIzIiwic2NvcGUiOltdLCJpc3MiOiJtb2JpbGVzdXBlcm1hcmtldC53ZWRlcGxveS5pbyIsIm5hbWUiOiJWaWN0b3IgTGFlcnRlIiwiaWF0IjoxNDg0NTg1NjY0LCJlbWFpbCI6InZpY3RvcmxhZXJ0ZWRvbGl2ZWlyYUBnbWFpbC5jb20iLCJwaWN0dXJlIjpudWxsLCJwcm92aWRlcnMiOnt9fQ==.K_fBuz1pzn0DOB_V4nbA6LJhKqOtWCtG4n02pqXnsfY=");
-		connection.setDoInput(true);
-		connection.setDoOutput(true);
-		connection.connect();
-	
-		InputStream in = connection.getInputStream();
-	
-		String s = IOUtils.toString(in, "UTF-8");
-	
-		return s;
-	}*/
+	public static boolean isHttpSuccess(int statusCode) {
+
+		if (statusCode > 199 && statusCode < 300) {
+			return true;
+		} else {
+			return false;
+		}
+	}
 
 }

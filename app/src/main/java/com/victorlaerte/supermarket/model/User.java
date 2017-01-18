@@ -8,6 +8,10 @@ import android.os.Parcelable;
 
 public interface User extends Parcelable {
 
+	public String getId();
+
+	public String getName();
+
 	public String getUserName();
 
 	public String getEmail();

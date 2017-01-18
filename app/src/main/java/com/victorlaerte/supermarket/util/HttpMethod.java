@@ -6,5 +6,5 @@ package com.victorlaerte.supermarket.util;
 
 public enum HttpMethod {
 
-	GET, HEAD, POST;
+	GET, POST, DELETE;
 }

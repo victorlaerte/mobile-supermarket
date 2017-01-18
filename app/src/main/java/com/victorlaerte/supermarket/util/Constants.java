@@ -9,17 +9,20 @@ public interface Constants {
 	String HTTP_PREFIX = "http://";
 	String LOGIN_BASE_URL = HTTP_PREFIX + "auth.mobilesupermarket.wedeploy.io";
 	String SIGN_UP_ENDPOINT = "/users";
+	String USER_ENDPOINT = "/user";
 	String LOGIN_AUTH_ENDPOINT = "/oauth/token";
-
 	String DATA_BASE_URL = HTTP_PREFIX + "data.mobilesupermarket.wedeploy.io";
+
 	String GET_PRODUCTS_ENDPOINT = "/products";
 	String AUTHORIZATION = "Authorization";
+	String CART_ENDPOINT = "/cart";
 
 	String PUBLIC_BASE_URL = HTTP_PREFIX + "public.mobilesupermarket.wedeploy.io";
 	String IMAGES_ENDPOINT = "/assets/images/";
 
 	String ACCESS_TOKEN = "access_token";
 	String TOKEN_TYPE = "token_type";
+	String CART = "cart";
 	String TYPE = "type";
 	String USERNAME = "username";
 	String USER = "user";
@@ -41,4 +44,6 @@ public interface Constants {
 	String TOKEN = "token";
 	String REFRESH_TOKEN = "refresh_token";
 	String SCOPE = "scope";
+	String ID = "id";
+	String MARKET_ITEM_LIST = "marketItemList";
 }

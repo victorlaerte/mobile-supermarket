@@ -4,6 +4,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.victorlaerte.supermarket.model.MarketItem;
+import com.victorlaerte.supermarket.util.Constants;
+import com.victorlaerte.supermarket.util.StringPool;
 
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -25,7 +27,7 @@ public class MarketItemImpl implements MarketItem {
 	private int height;
 
 	public MarketItemImpl(String id, String title, String description, String type, double price, int rating,
-						  String imageFileName, int width, int height) {
+			String imageFileName, int width, int height) {
 		this.id = id;
 		this.title = title;
 		this.description = description;
@@ -44,10 +46,10 @@ public class MarketItemImpl implements MarketItem {
 
 	private void fill(JSONObject json) throws JSONException {
 
-		this.id = json.getString("id");
+		this.id = json.getString(Constants.ID);
 		this.title = json.getString("title");
 		this.description = json.getString("description");
-		this.type = json.getString("type");
+		this.type = json.getString(Constants.TYPE);
 		this.price = json.getDouble("price");
 		this.rating = json.getInt("rating");
 		this.imageFileName = json.getString("filename");
@@ -146,5 +148,49 @@ public class MarketItemImpl implements MarketItem {
 		imageFileName = in.readString();
 		width = in.readInt();
 		height = in.readInt();
+	}
+
+	@Override
+	public String toString() {
+
+		StringBuilder sb = new StringBuilder(StringPool.OPEN_CURLY_BRACE);
+		sb.append("\"" + Constants.ID + "\"");
+		sb.append(StringPool.COLON);
+		sb.append("\"" + id + "\"");
+		sb.append(StringPool.COMMA);
+		sb.append("\"title\"");
+		sb.append(StringPool.COLON);
+		sb.append("\"" + title + "\"");
+		sb.append(StringPool.COMMA);
+		sb.append("\"description\"");
+		sb.append(StringPool.COLON);
+		sb.append("\"" + description + "\"");
+		sb.append(StringPool.COMMA);
+		sb.append("\"" + Constants.TYPE + "\"");
+		sb.append(StringPool.COLON);
+		sb.append("\"" + type + "\"");
+		sb.append(StringPool.COMMA);
+		sb.append("\"price\"");
+		sb.append(StringPool.COLON);
+		sb.append(price);
+		sb.append(StringPool.COMMA);
+		sb.append("\"rating\"");
+		sb.append(StringPool.COLON);
+		sb.append(rating);
+		sb.append(StringPool.COMMA);
+		sb.append("\"filename\"");
+		sb.append(StringPool.COLON);
+		sb.append("\"" + imageFileName + "\"");
+		sb.append(StringPool.COMMA);
+		sb.append("\"width\"");
+		sb.append(StringPool.COLON);
+		sb.append(width);
+		sb.append(StringPool.COMMA);
+		sb.append("\"height\"");
+		sb.append(StringPool.COLON);
+		sb.append(height);
+		sb.append(StringPool.CLOSE_CURLY_BRACE);
+
+		return sb.toString();
 	}
 }

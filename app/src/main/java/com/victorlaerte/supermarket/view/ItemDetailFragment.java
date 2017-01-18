@@ -59,7 +59,8 @@ public class ItemDetailFragment extends Fragment {
 
 			String url = Constants.PUBLIC_BASE_URL + Constants.IMAGES_ENDPOINT + mItem.getImageFileName();
 
-			Picasso.with(getContext()).load(url).into((ImageView) rootView.findViewById(R.id.item_large_image));
+			Picasso.with(getContext()).load(url).resize(mItem.getWidth(), mItem.getHeight()).into(
+					(ImageView) rootView.findViewById(R.id.item_large_image));
 
 			((RatingBar) rootView.findViewById(R.id.rating_bar)).setRating(mItem.getRating());
 

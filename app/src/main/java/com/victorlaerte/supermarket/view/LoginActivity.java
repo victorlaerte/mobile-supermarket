@@ -15,6 +15,7 @@ import com.victorlaerte.supermarket.model.Token;
 import com.victorlaerte.supermarket.model.User;
 import com.victorlaerte.supermarket.model.impl.TokenImpl;
 import com.victorlaerte.supermarket.model.impl.UserImpl;
+import com.victorlaerte.supermarket.service.GetUserInfoTask;
 import com.victorlaerte.supermarket.service.UserLoginTask;
 import com.victorlaerte.supermarket.service.UserSignUpTask;
 import com.victorlaerte.supermarket.util.AndroidUtil;
@@ -58,6 +59,7 @@ public class LoginActivity extends AppCompatActivity {
 	private boolean signUp = false;
 	private UserSignUpTask signUpTask = null;
 	private UserLoginTask userLoginTask = null;
+	private GetUserInfoTask getUserInfoTask = null;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -437,12 +439,9 @@ public class LoginActivity extends AppCompatActivity {
 			if (!accessToken.isEmpty()) {
 
 				Token token = new TokenImpl(accessToken, tokenType);
-				User user = new UserImpl(email, email, token);
 
-				SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-				preferences.edit().putString(Constants.USER, user.toString()).commit();
-
-				initItemListActivity(user);
+				getUserInfoTask = new GetUserInfoTask(LoginActivity.this, token);
+				getUserInfoTask.execute((Void) null);
 
 			} else {
 
@@ -459,7 +458,7 @@ public class LoginActivity extends AppCompatActivity {
 	private void initItemListActivity(User user) {
 
 		Intent intent = new Intent(getApplicationContext(), ItemListActivity.class);
-		intent.putExtra(user.getClass().getName(), user);
+		intent.putExtra(Constants.USER, user);
 
 		startActivity(intent);
 
@@ -501,6 +500,34 @@ public class LoginActivity extends AppCompatActivity {
 
 	}
 
+	public void onGetUserInfoComplete(boolean success, User user, String errorMsg) {
+
+		showProgress(false);
+
+		try {
+
+			if (success) {
+
+				successfulGetUserInfo(user);
+
+			} else {
+
+				DialogUtil.showAlertDialog(this, getString(R.string.error), errorMsg);
+			}
+
+		} finally {
+
+			getUserInfoTask = null;
+		}
+	}
+
+	private void successfulGetUserInfo(User user) {
+
+		AndroidUtil.saveToSharedPreferences(getApplicationContext(), Constants.USER, user.toString());
+
+		initItemListActivity(user);
+	}
+
 	public void onSignUpCanceled() {
 
 		signUpTask = null;
@@ -510,6 +537,12 @@ public class LoginActivity extends AppCompatActivity {
 	public void onLoginCanceled() {
 
 		userLoginTask = null;
+		showProgress(false);
+	}
+
+	public void onGetUserInfoCanceled() {
+
+		getUserInfoTask = null;
 		showProgress(false);
 	}
 }

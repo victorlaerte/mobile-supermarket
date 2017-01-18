@@ -17,13 +17,15 @@ import android.os.Parcelable;
 
 public class UserImpl implements User {
 
+	private String id;
+	private String name;
 	private String userName;
 	private String email;
 	private Token token;
 
-	public UserImpl(String userName, String email, Token token) {
+	public UserImpl(String id, String name, String userName, String email, Token token) {
 
-		fill(userName, email, token);
+		fill(id, name, userName, email, token);
 	}
 
 	public UserImpl(JSONObject json) throws JSONException {
@@ -33,15 +35,34 @@ public class UserImpl implements User {
 
 	private void fill(JSONObject json) throws JSONException {
 
-		fill(json.getString(Constants.USERNAME), json.getString(Constants.EMAIL),
-				new TokenImpl(json.getJSONObject(Constants.TOKEN)));
+		String id = json.getString(Constants.ID);
+		String name = json.getString(Constants.NAME);
+		String userName = json.getString(Constants.USERNAME);
+		String email = json.getString(Constants.EMAIL);
+		Token token = new TokenImpl(json.getJSONObject(Constants.TOKEN));
+
+		fill(id, name, userName, email, token);
 	}
 
-	public void fill(String userName, String email, Token token) {
+	public void fill(String id, String name, String userName, String email, Token token) {
 
+		this.id = id;
+		this.name = name;
 		this.userName = userName;
 		this.email = email;
 		this.token = token;
+	}
+
+	@Override
+	public String getId() {
+
+		return id;
+	}
+
+	@Override
+	public String getName() {
+
+		return name;
 	}
 
 	@Override
@@ -71,6 +92,8 @@ public class UserImpl implements User {
 	@Override
 	public void writeToParcel(Parcel dest, int flags) {
 
+		dest.writeString(id);
+		dest.writeString(name);
 		dest.writeString(userName);
 		dest.writeString(email);
 		dest.writeParcelable(token, flags);
@@ -93,6 +116,8 @@ public class UserImpl implements User {
 
 	private UserImpl(Parcel in) {
 
+		id = in.readString();
+		name = in.readString();
 		userName = in.readString();
 		email = in.readString();
 		token = in.readParcelable(TokenImpl.class.getClassLoader());
@@ -102,6 +127,14 @@ public class UserImpl implements User {
 	public String toString() {
 
 		StringBuilder sb = new StringBuilder(StringPool.OPEN_CURLY_BRACE);
+		sb.append("\"" + Constants.ID + "\"");
+		sb.append(StringPool.COLON);
+		sb.append("\"" + id + "\"");
+		sb.append(StringPool.COMMA);
+		sb.append("\"" + Constants.NAME + "\"");
+		sb.append(StringPool.COLON);
+		sb.append("\"" + name + "\"");
+		sb.append(StringPool.COMMA);
 		sb.append("\"" + Constants.USERNAME + "\"");
 		sb.append(StringPool.COLON);
 		sb.append("\"" + userName + "\"");

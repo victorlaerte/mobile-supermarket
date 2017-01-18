@@ -1,9 +1,15 @@
 package com.victorlaerte.supermarket.view;
 
 import com.victorlaerte.supermarket.R;
+import com.victorlaerte.supermarket.model.MarketItem;
+import com.victorlaerte.supermarket.model.User;
+import com.victorlaerte.supermarket.service.SaveItemToCartTask;
+import com.victorlaerte.supermarket.util.AndroidUtil;
 import com.victorlaerte.supermarket.util.Constants;
+import com.victorlaerte.supermarket.util.Validator;
 
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.ActionBar;
@@ -20,62 +26,105 @@ import android.view.View;
  */
 public class ItemDetailActivity extends AppCompatActivity {
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
+	private MarketItem marketItem;
+	private User user;
 
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_item_detail);
+	@Override
+	protected void onCreate(Bundle savedInstanceState) {
 
-        Toolbar toolbar = (Toolbar) findViewById(R.id.detail_toolbar);
-        setSupportActionBar(toolbar);
+		super.onCreate(savedInstanceState);
+		setContentView(R.layout.activity_item_detail);
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
+		Parcelable parcelableMarketItem = getIntent().getParcelableExtra(Constants.ITEM);
+		Parcelable parcelableUser = getIntent().getParcelableExtra(Constants.USER);
 
-            @Override
-            public void onClick(View view) {
+		if (Validator.isNotNull(parcelableMarketItem)) {
 
-                Snackbar.make(view, getString(R.string.item_added_to_cart), Snackbar.LENGTH_LONG).setAction("Action", null).show();
-            }
-        });
+			marketItem = (MarketItem) parcelableMarketItem;
+		}
 
-        // Show the Up button in the action bar.
-        ActionBar actionBar = getSupportActionBar();
-        if (actionBar != null) {
-            actionBar.setDisplayHomeAsUpEnabled(true);
-        }
+		if (Validator.isNotNull(parcelableUser)) {
 
-        // savedInstanceState is non-null when there is fragment state
-        // saved from previous configurations of this activity
-        // (e.g. when rotating the screen from portrait to landscape).
-        // In this case, the fragment will automatically be re-added
-        // to its container so we don't need to manually add it.
-        // For more information, see the Fragments API guide at:
-        //
-        // http://developer.android.com/guide/components/fragments.html
-        //
-        if (savedInstanceState == null) {
-            // Create the detail fragment and add it to the activity
-            // using a fragment transaction.
-            Bundle arguments = new Bundle();
-            arguments.putParcelable(Constants.ITEM, getIntent().getParcelableExtra(Constants.ITEM));
+			user = (User) parcelableUser;
+		}
 
-            ItemDetailFragment fragment = new ItemDetailFragment();
-            fragment.setArguments(arguments);
-            getSupportFragmentManager().beginTransaction().add(R.id.item_detail_container, fragment).commit();
-        }
-    }
+		Toolbar toolbar = (Toolbar) findViewById(R.id.detail_toolbar);
+		setSupportActionBar(toolbar);
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
+		FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+		fab.setOnClickListener(new View.OnClickListener() {
 
-        int id = item.getItemId();
+			@Override
+			public void onClick(View view) {
 
-        if (id == android.R.id.home) {
+				if (AndroidUtil.isNetworkAvaliable(getApplicationContext())) {
 
-            onBackPressed();
-            return true;
-        }
-        return super.onOptionsItemSelected(item);
-    }
+					new SaveItemToCartTask(ItemDetailActivity.this, user, marketItem).execute((String) null);
+
+				} else {
+
+					/*Cart.getInstance().addItem(marketItem);*/
+				}
+
+				Snackbar.make(view, getString(R.string.item_added_to_cart), Snackbar.LENGTH_LONG)
+						.setAction("Action", null)
+						.show();
+			}
+		});
+
+		// Show the Up button in the action bar.
+		ActionBar actionBar = getSupportActionBar();
+		if (actionBar != null) {
+			actionBar.setDisplayHomeAsUpEnabled(true);
+		}
+
+		// savedInstanceState is non-null when there is fragment state
+		// saved from previous configurations of this activity
+		// (e.g. when rotating the screen from portrait to landscape).
+		// In this case, the fragment will automatically be re-added
+		// to its container so we don't need to manually add it.
+		// For more information, see the Fragments API guide at:
+		//
+		// http://developer.android.com/guide/components/fragments.html
+		//
+		if (savedInstanceState == null) {
+			// Create the detail fragment and add it to the activity
+			// using a fragment transaction.
+			Bundle arguments = new Bundle();
+			arguments.putParcelable(Constants.ITEM, marketItem);
+
+			ItemDetailFragment fragment = new ItemDetailFragment();
+			fragment.setArguments(arguments);
+			getSupportFragmentManager().beginTransaction().add(R.id.item_detail_container, fragment).commit();
+		}
+	}
+
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+
+		int id = item.getItemId();
+
+		if (id == android.R.id.home) {
+
+			onBackPressed();
+			return true;
+		}
+		return super.onOptionsItemSelected(item);
+	}
+
+	@Override
+	public void onSaveInstanceState(Bundle savedInstanceState) {
+
+		super.onSaveInstanceState(savedInstanceState);
+
+		savedInstanceState.putParcelable(Constants.ITEM, marketItem);
+	}
+
+	@Override
+	public void onRestoreInstanceState(Bundle savedInstanceState) {
+
+		super.onRestoreInstanceState(savedInstanceState);
+
+		marketItem = savedInstanceState.getParcelable(Constants.ITEM);
+	}
 }

@@ -31,103 +31,103 @@ import android.util.Log;
 
 public class GetMarketItemsTask extends AsyncTask<Void, Void, Boolean> {
 
-    private static final String TAG = GetMarketItemsTask.class.getName();
-    private final User user;
-    private WeakReference<ItemListActivity> wItemListActivity;
-    private String url = Constants.DATA_BASE_URL + Constants.GET_PRODUCTS_ENDPOINT;
-    private List<MarketItem> marketItemList = new ArrayList<MarketItem>();
-    private String errorMsg = StringPool.BLANK;
-    private TypeFilter typeFilter;
+	private static final String TAG = GetMarketItemsTask.class.getName();
+	private final User user;
+	private WeakReference<ItemListActivity> wItemListActivity;
+	private String url = Constants.DATA_BASE_URL + Constants.GET_PRODUCTS_ENDPOINT;
+	private List<MarketItem> marketItemList = new ArrayList<MarketItem>();
+	private String errorMsg = StringPool.BLANK;
+	private TypeFilter typeFilter;
 
-    public GetMarketItemsTask(ItemListActivity itemListActivity, User user, TypeFilter typeFilter) {
+	public GetMarketItemsTask(ItemListActivity itemListActivity, User user, TypeFilter typeFilter) {
 
-        wItemListActivity = new WeakReference<ItemListActivity>(itemListActivity);
-        this.user = user;
-        this.typeFilter = typeFilter;
-    }
+		wItemListActivity = new WeakReference<ItemListActivity>(itemListActivity);
+		this.user = user;
+		this.typeFilter = typeFilter;
+	}
 
-    @Override
-    protected Boolean doInBackground(Void... params) {
+	@Override
+	protected Boolean doInBackground(Void... params) {
 
-        try {
+		try {
 
-            Map<String, String> mapParams = new HashMap<String, String>();
+			Map<String, String> mapParams = new HashMap<String, String>();
 
-            if (Validator.isNotNull(typeFilter)) {
+			if (Validator.isNotNull(typeFilter)) {
 
-                mapParams.put(Constants.FILTER, getFilterJSONAsString(typeFilter));
-            }
+				mapParams.put(Constants.FILTER, getFilterJSONAsString(typeFilter));
+			}
 
-            JSONObject jsonResponse = WebServiceUtil.readJSONResponse(url, HttpMethod.GET, mapParams, true,
-                    SuperMarketUtil.getAuthString(user.getToken().getAccessToken()));
+			JSONObject jsonResponse = WebServiceUtil.readJSONResponse(url, HttpMethod.GET, mapParams, true,
+					SuperMarketUtil.getAuthString(user.getToken().getAccessToken()));
 
-            Log.d(TAG, jsonResponse.toString());
+			Log.d(TAG, jsonResponse.toString());
 
-            if (jsonResponse.getInt(Constants.STATUS_CODE) == 200) {
+			if (WebServiceUtil.isHttpSuccess(jsonResponse.getInt(Constants.STATUS_CODE))) {
 
-                JSONArray jArrayItem = jsonResponse.getJSONArray(Constants.BODY);
+				JSONArray jArrayItem = jsonResponse.getJSONArray(Constants.BODY);
 
-                for (int i = 0; i < jArrayItem.length(); i++) {
+				for (int i = 0; i < jArrayItem.length(); i++) {
 
-                    JSONObject currentJSONItem = jArrayItem.getJSONObject(i);
+					JSONObject currentJSONItem = jArrayItem.getJSONObject(i);
 
-                    try {
+					try {
 
-                        MarketItem marketItem = new MarketItemImpl(currentJSONItem);
-                        marketItemList.add(marketItem);
+						MarketItem marketItem = new MarketItemImpl(currentJSONItem);
+						marketItemList.add(marketItem);
 
-                    } catch (JSONException ex) {
+					} catch (JSONException ex) {
 
-                        Log.e(TAG, ex.getMessage());
-                    }
-                }
+						Log.e(TAG, ex.getMessage());
+					}
+				}
 
-                return true;
+				return true;
 
-            } else {
+			} else {
 
-                errorMsg = jsonResponse.getString(Constants.STATUS_MSG);
-            }
+				errorMsg = jsonResponse.getString(Constants.STATUS_MSG);
+			}
 
-        } catch (Exception e) {
+		} catch (Exception e) {
 
-            errorMsg = e.getMessage();
-            Log.e(TAG, e.getMessage());
-        }
+			errorMsg = e.getMessage();
+			Log.e(TAG, e.getMessage());
+		}
 
-        return false;
-    }
+		return false;
+	}
 
-    private String getFilterJSONAsString(TypeFilter typeFilter) {
+	private String getFilterJSONAsString(TypeFilter typeFilter) {
 
-        StringBuilder sb = new StringBuilder(StringPool.OPEN_CURLY_BRACE);
-        sb.append("\"" + Constants.TYPE + "\"");
-        sb.append(StringPool.COLON);
-        sb.append("\"" + typeFilter.getLabel() + "\"");
-        sb.append(StringPool.CLOSE_CURLY_BRACE);
+		StringBuilder sb = new StringBuilder(StringPool.OPEN_CURLY_BRACE);
+		sb.append("\"" + Constants.TYPE + "\"");
+		sb.append(StringPool.COLON);
+		sb.append("\"" + typeFilter.getLabel() + "\"");
+		sb.append(StringPool.CLOSE_CURLY_BRACE);
 
-        return sb.toString();
-    }
+		return sb.toString();
+	}
 
-    @Override
-    protected void onPostExecute(final Boolean success) {
+	@Override
+	protected void onPostExecute(final Boolean success) {
 
-        ItemListActivity itemListActivity = wItemListActivity.get();
+		ItemListActivity itemListActivity = wItemListActivity.get();
 
-        if (Validator.isNotNull(itemListActivity)) {
+		if (Validator.isNotNull(itemListActivity)) {
 
-            itemListActivity.setupRecyclerView(success, errorMsg, marketItemList);
-        }
-    }
+			itemListActivity.setupRecyclerView(success, errorMsg, marketItemList);
+		}
+	}
 
-    @Override
-    protected void onCancelled() {
+	@Override
+	protected void onCancelled() {
 
-        ItemListActivity itemListActivity = wItemListActivity.get();
+		ItemListActivity itemListActivity = wItemListActivity.get();
 
-        if (Validator.isNotNull(itemListActivity)) {
+		if (Validator.isNotNull(itemListActivity)) {
 
-            itemListActivity.onGetProductsCanceled();
-        }
-    }
+			itemListActivity.onGetProductsCanceled();
+		}
+	}
 }
