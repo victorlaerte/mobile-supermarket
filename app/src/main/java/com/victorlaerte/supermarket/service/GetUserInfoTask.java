@@ -10,15 +10,17 @@ import java.util.Map;
 
 import org.json.JSONObject;
 
+import com.victorlaerte.supermarket.R;
 import com.victorlaerte.supermarket.model.Token;
 import com.victorlaerte.supermarket.model.User;
 import com.victorlaerte.supermarket.model.impl.UserImpl;
+import com.victorlaerte.supermarket.util.AndroidUtil;
 import com.victorlaerte.supermarket.util.Constants;
 import com.victorlaerte.supermarket.util.HttpMethod;
+import com.victorlaerte.supermarket.util.HttpUtil;
 import com.victorlaerte.supermarket.util.StringPool;
 import com.victorlaerte.supermarket.util.SuperMarketUtil;
 import com.victorlaerte.supermarket.util.Validator;
-import com.victorlaerte.supermarket.util.WebServiceUtil;
 import com.victorlaerte.supermarket.view.LoginActivity;
 
 import android.os.AsyncTask;
@@ -46,12 +48,12 @@ public class GetUserInfoTask extends AsyncTask<Void, Void, Boolean> {
 
 		try {
 
-			JSONObject jsonResponse = WebServiceUtil.readJSONResponse(url, HttpMethod.GET, httpParams, true,
+			JSONObject jsonResponse = HttpUtil.sendRequest(url, HttpMethod.GET, httpParams,
 					SuperMarketUtil.getAuthString(token.getAccessToken()));
 
 			Log.d(TAG, jsonResponse.toString());
 
-			if (WebServiceUtil.isHttpSuccess(jsonResponse.getInt(Constants.STATUS_CODE))) {
+			if (HttpUtil.isHttpSuccess(jsonResponse.getInt(Constants.STATUS_CODE))) {
 
 				JSONObject body = jsonResponse.getJSONObject(Constants.BODY);
 
@@ -70,7 +72,10 @@ public class GetUserInfoTask extends AsyncTask<Void, Void, Boolean> {
 
 		} catch (Exception e) {
 
-			errorMsg = e.getMessage();
+			if (Validator.isNotNull(wLoginActivity.get())) {
+
+				errorMsg = AndroidUtil.getString(wLoginActivity.get(), R.string.error_unknown_error);
+			}
 			Log.e(TAG, e.getMessage());
 		}
 

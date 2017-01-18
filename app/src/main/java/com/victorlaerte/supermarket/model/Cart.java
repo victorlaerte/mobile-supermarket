@@ -24,43 +24,43 @@ public class Cart implements Parcelable {
 		map = new HashMap<String, CartItem>();
 	}
 
+	public void clear() {
+
+		map.clear();
+	}
+
 	public Map<String, CartItem> getMap() {
 
 		return map;
 	}
 
-	public void addItem(String cartItemId, MarketItem marketItem) {
+	public void addItem(CartItem cartItem) {
 
-		if (map.containsKey(marketItem.getId())) {
+		if (map.containsKey(cartItem.getMarketItem().getId())) {
 
-			CartItem cartItem = map.get(marketItem.getId());
+			CartItem cartItemFromMap = map.get(cartItem.getMarketItem().getId());
 
-			cartItem.addOneMore(cartItemId);
+			cartItemFromMap.addOneMore(cartItem.getId());
 
 		} else {
 
-			map.put(marketItem.getId(), new CartItemImpl(cartItemId, marketItem));
+			map.put(cartItem.getMarketItem().getId(), new CartItemImpl(cartItem.getId(), cartItem.getMarketItem()));
 		}
 	}
 
-	public void removeItem(String cartItemId, MarketItem marketItem) {
+	public void removeItem(CartItem cartItem) {
 
-		if (map.containsKey(marketItem.getId())) {
+		if (map.containsKey(cartItem.getMarketItem().getId())) {
 
-			CartItem cartItem = map.get(marketItem.getId());
+			CartItem cartItemFromMap = map.get(cartItem.getMarketItem().getId());
 
-			int remaining = cartItem.removeOne(cartItemId);
+			int remaining = cartItemFromMap.removeOne(cartItem.getId());
 
 			if (remaining == 0) {
 
-				map.remove(marketItem.getId());
+				map.remove(cartItem.getMarketItem().getId());
 			}
 		}
-	}
-
-	public void removeAll() {
-
-		map.clear();
 	}
 
 	public static synchronized Cart getInstance() {

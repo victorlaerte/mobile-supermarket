@@ -5,23 +5,23 @@ package com.victorlaerte.supermarket.service;
  */
 
 import java.lang.ref.WeakReference;
-import java.util.HashMap;
-import java.util.Map;
 
 import org.json.JSONObject;
 
 import com.victorlaerte.supermarket.R;
 import com.victorlaerte.supermarket.model.Cart;
+import com.victorlaerte.supermarket.model.CartItem;
 import com.victorlaerte.supermarket.model.MarketItem;
 import com.victorlaerte.supermarket.model.User;
+import com.victorlaerte.supermarket.model.impl.CartItemImpl;
 import com.victorlaerte.supermarket.util.AndroidUtil;
 import com.victorlaerte.supermarket.util.Constants;
 import com.victorlaerte.supermarket.util.DialogUtil;
 import com.victorlaerte.supermarket.util.HttpMethod;
+import com.victorlaerte.supermarket.util.HttpUtil;
 import com.victorlaerte.supermarket.util.StringPool;
 import com.victorlaerte.supermarket.util.SuperMarketUtil;
 import com.victorlaerte.supermarket.util.Validator;
-import com.victorlaerte.supermarket.util.WebServiceUtil;
 import com.victorlaerte.supermarket.view.ItemDetailActivity;
 
 import android.os.AsyncTask;
@@ -34,7 +34,7 @@ public class SaveItemToCartTask extends AsyncTask<String, String, Boolean> {
 	private String url = Constants.DATA_BASE_URL + Constants.CART_ENDPOINT;
 	private User user;
 	private MarketItem marketItem;
-	private String cartItemId;
+	private CartItem cartItem;
 	private String errorMsg = StringPool.BLANK;
 
 	public SaveItemToCartTask(ItemDetailActivity itemDetailActivity, User user, MarketItem marketItem) {
@@ -46,24 +46,25 @@ public class SaveItemToCartTask extends AsyncTask<String, String, Boolean> {
 
 	protected Boolean doInBackground(String... params) {
 
-		Map<String, String> httpParams = new HashMap<String, String>();
-		httpParams.put("productTitle", marketItem.getTitle());
-		httpParams.put("productPrice", String.valueOf(marketItem.getPrice()));
-		httpParams.put("productFilename", marketItem.getImageFileName());
-		httpParams.put("productId", marketItem.getId());
-		httpParams.put("userId", user.getId());
-
 		try {
 
-			JSONObject jsonResponse = WebServiceUtil.readJSONResponse(url, HttpMethod.POST, httpParams, true,
+			JSONObject jsonParams = new JSONObject();
+			jsonParams.put("productTitle", marketItem.getTitle());
+			jsonParams.put("productPrice", marketItem.getPrice());
+			jsonParams.put("productFilename", marketItem.getImageFileName());
+			jsonParams.put("productId", marketItem.getId());
+			jsonParams.put("userId", user.getId());
+
+			JSONObject jsonResponse = HttpUtil.sendRequest(url, HttpMethod.POST, jsonParams,
 					SuperMarketUtil.getAuthString(user.getToken().getAccessToken()));
 
 			Log.d(TAG, jsonResponse.toString());
 
-			if (WebServiceUtil.isHttpSuccess(jsonResponse.getInt(Constants.STATUS_CODE))) {
+			if (HttpUtil.isHttpSuccess(jsonResponse.getInt(Constants.STATUS_CODE))) {
 
-				cartItemId = jsonResponse.getJSONObject(Constants.BODY).getString(Constants.ID);
+				String cartItemId = jsonResponse.getJSONObject(Constants.BODY).getString(Constants.ID);
 
+				cartItem = new CartItemImpl(cartItemId, marketItem);
 				return true;
 
 			} else {
@@ -73,7 +74,9 @@ public class SaveItemToCartTask extends AsyncTask<String, String, Boolean> {
 
 		} catch (Exception e) {
 
-			errorMsg = AndroidUtil.getString(wItemDetailActivity.get(), R.string.error_unknown_error);
+			if (wItemDetailActivity.get() != null) {
+				errorMsg = AndroidUtil.getString(wItemDetailActivity.get(), R.string.error_unknown_error);
+			}
 			Log.e(TAG, e.getMessage());
 		}
 
@@ -87,7 +90,7 @@ public class SaveItemToCartTask extends AsyncTask<String, String, Boolean> {
 
 		if (Validator.isNotNull(itemDetailActivity) && success) {
 
-			Cart.getInstance().addItem(cartItemId, marketItem);
+			Cart.getInstance().addItem(cartItem);
 
 		} else if (Validator.isNotNull(itemDetailActivity) && !success) {
 

@@ -10,16 +10,18 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import com.victorlaerte.supermarket.R;
 import com.victorlaerte.supermarket.model.MarketItem;
 import com.victorlaerte.supermarket.model.TypeFilter;
 import com.victorlaerte.supermarket.model.User;
 import com.victorlaerte.supermarket.model.impl.MarketItemImpl;
+import com.victorlaerte.supermarket.util.AndroidUtil;
 import com.victorlaerte.supermarket.util.Constants;
 import com.victorlaerte.supermarket.util.HttpMethod;
+import com.victorlaerte.supermarket.util.HttpUtil;
 import com.victorlaerte.supermarket.util.StringPool;
 import com.victorlaerte.supermarket.util.SuperMarketUtil;
 import com.victorlaerte.supermarket.util.Validator;
-import com.victorlaerte.supermarket.util.WebServiceUtil;
 import com.victorlaerte.supermarket.view.ItemListActivity;
 
 import android.os.AsyncTask;
@@ -58,12 +60,12 @@ public class GetMarketItemsTask extends AsyncTask<Void, Void, Boolean> {
 				mapParams.put(Constants.FILTER, getFilterJSONAsString(typeFilter));
 			}
 
-			JSONObject jsonResponse = WebServiceUtil.readJSONResponse(url, HttpMethod.GET, mapParams, true,
+			JSONObject jsonResponse = HttpUtil.sendRequest(url, HttpMethod.GET, mapParams,
 					SuperMarketUtil.getAuthString(user.getToken().getAccessToken()));
 
 			Log.d(TAG, jsonResponse.toString());
 
-			if (WebServiceUtil.isHttpSuccess(jsonResponse.getInt(Constants.STATUS_CODE))) {
+			if (HttpUtil.isHttpSuccess(jsonResponse.getInt(Constants.STATUS_CODE))) {
 
 				JSONArray jArrayItem = jsonResponse.getJSONArray(Constants.BODY);
 
@@ -91,7 +93,11 @@ public class GetMarketItemsTask extends AsyncTask<Void, Void, Boolean> {
 
 		} catch (Exception e) {
 
-			errorMsg = e.getMessage();
+			if (Validator.isNotNull(wItemListActivity.get())) {
+
+				errorMsg = AndroidUtil.getString(wItemListActivity.get(), R.string.error_unknown_error);
+			}
+
 			Log.e(TAG, e.getMessage());
 		}
 

@@ -47,14 +47,14 @@ public class MarketItemImpl implements MarketItem {
 	private void fill(JSONObject json) throws JSONException {
 
 		this.id = json.getString(Constants.ID);
-		this.title = json.getString("title");
-		this.description = json.getString("description");
+		this.title = json.getString(Constants.TITLE);
+		this.description = json.getString(Constants.DESCRIPTION);
 		this.type = json.getString(Constants.TYPE);
-		this.price = json.getDouble("price");
-		this.rating = json.getInt("rating");
-		this.imageFileName = json.getString("filename");
-		this.width = json.getInt("width");
-		this.height = json.getInt("height");
+		this.price = json.getDouble(Constants.PRICE);
+		this.rating = json.getInt(Constants.RATING);
+		this.imageFileName = json.getString(Constants.FILENAME);
+		this.width = json.getInt(Constants.WIDTH);
+		this.height = json.getInt(Constants.HEIGHT);
 	}
 
 	public String getId() {
@@ -158,11 +158,11 @@ public class MarketItemImpl implements MarketItem {
 		sb.append(StringPool.COLON);
 		sb.append("\"" + id + "\"");
 		sb.append(StringPool.COMMA);
-		sb.append("\"title\"");
+		sb.append("\"" + Constants.TITLE + "\"");
 		sb.append(StringPool.COLON);
 		sb.append("\"" + title + "\"");
 		sb.append(StringPool.COMMA);
-		sb.append("\"description\"");
+		sb.append("\"" + Constants.DESCRIPTION + "\"");
 		sb.append(StringPool.COLON);
 		sb.append("\"" + description + "\"");
 		sb.append(StringPool.COMMA);
@@ -170,23 +170,23 @@ public class MarketItemImpl implements MarketItem {
 		sb.append(StringPool.COLON);
 		sb.append("\"" + type + "\"");
 		sb.append(StringPool.COMMA);
-		sb.append("\"price\"");
+		sb.append("\"" + Constants.PRICE + "\"");
 		sb.append(StringPool.COLON);
 		sb.append(price);
 		sb.append(StringPool.COMMA);
-		sb.append("\"rating\"");
+		sb.append("\"" + Constants.RATING + "\"");
 		sb.append(StringPool.COLON);
 		sb.append(rating);
 		sb.append(StringPool.COMMA);
-		sb.append("\"filename\"");
+		sb.append("\"" + Constants.FILENAME + "\"");
 		sb.append(StringPool.COLON);
 		sb.append("\"" + imageFileName + "\"");
 		sb.append(StringPool.COMMA);
-		sb.append("\"width\"");
+		sb.append("\"" + Constants.WIDTH + "\"");
 		sb.append(StringPool.COLON);
 		sb.append(width);
 		sb.append(StringPool.COMMA);
-		sb.append("\"height\"");
+		sb.append("\"" + Constants.HEIGHT + "\"");
 		sb.append(StringPool.COLON);
 		sb.append(height);
 		sb.append(StringPool.CLOSE_CURLY_BRACE);

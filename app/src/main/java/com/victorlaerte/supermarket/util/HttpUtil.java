@@ -22,18 +22,24 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONTokener;
 
-public class WebServiceUtil {
+public class HttpUtil {
 
-	private static final String TAG = WebServiceUtil.class.getName();
+	private static final String TAG = HttpUtil.class.getName();
 
-	public static JSONObject readJSONResponse(String uri, HttpMethod httpMethod, Map<String, String> paramsMap)
-			throws MalformedURLException, IOException, JSONException {
+	public static JSONObject sendRequest(String uri, HttpMethod httpMethod, Map<String, String> paramsMap,
+			String authToken) throws MalformedURLException, IOException, JSONException {
 
-		return readJSONResponse(uri, httpMethod, paramsMap, false, StringPool.BLANK);
+		return sendRequest(uri, httpMethod, paramsMap, null, authToken);
 	}
 
-	public static JSONObject readJSONResponse(String uri, HttpMethod httpMethod, Map<String, String> paramsMap,
-			boolean basicAuth, String authString) throws MalformedURLException, IOException, JSONException {
+	public static JSONObject sendRequest(String uri, HttpMethod httpMethod, JSONObject jsonParams, String authToken)
+			throws MalformedURLException, IOException, JSONException {
+
+		return sendRequest(uri, httpMethod, null, jsonParams, authToken);
+	}
+
+	private static JSONObject sendRequest(String uri, HttpMethod httpMethod, Map<String, String> paramsMap,
+			JSONObject jsonParams, String authToken) throws MalformedURLException, IOException, JSONException {
 
 		JSONObject jsonObject = new JSONObject();
 
@@ -50,6 +56,10 @@ public class WebServiceUtil {
 			if (Validator.isNotNull(paramsMap) && !paramsMap.isEmpty()) {
 
 				query = getQuery(paramsMap);
+
+			} else if (Validator.isNotNull(jsonParams)) {
+
+				query = jsonParams.toString();
 			}
 
 			if (!query.isEmpty() && !httpMethod.equals(HttpMethod.POST)) {
@@ -61,9 +71,13 @@ public class WebServiceUtil {
 
 			connection = (HttpURLConnection) url.openConnection();
 
-			if (basicAuth && Validator.isNotNull(authString) && !authString.isEmpty()) {
+			if (Validator.isNotNull(authToken) && !authToken.isEmpty()) {
 
-				connection.setRequestProperty(Constants.AUTHORIZATION, authString);
+				connection.setRequestProperty(Constants.AUTHORIZATION, authToken);
+			}
+
+			if (Validator.isNotNull(jsonParams)) {
+				connection.setRequestProperty("Content-type", "application/json");
 			}
 
 			connection.setRequestMethod(httpMethod.toString());

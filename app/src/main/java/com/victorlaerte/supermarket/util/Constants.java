@@ -46,4 +46,11 @@ public interface Constants {
 	String SCOPE = "scope";
 	String ID = "id";
 	String MARKET_ITEM_LIST = "marketItemList";
+	String TITLE = "title";
+	String DESCRIPTION = "description";
+	String PRICE = "price";
+	String RATING = "rating";
+	String FILENAME = "filename";
+	String WIDTH = "width";
+	String HEIGHT = "height";
 }

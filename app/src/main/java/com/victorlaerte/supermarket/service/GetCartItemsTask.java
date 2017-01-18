@@ -12,17 +12,16 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.victorlaerte.supermarket.R;
 import com.victorlaerte.supermarket.model.Cart;
 import com.victorlaerte.supermarket.model.User;
+import com.victorlaerte.supermarket.model.impl.CartItemImpl;
 import com.victorlaerte.supermarket.model.impl.MarketItemImpl;
-import com.victorlaerte.supermarket.util.AndroidUtil;
 import com.victorlaerte.supermarket.util.Constants;
 import com.victorlaerte.supermarket.util.HttpMethod;
+import com.victorlaerte.supermarket.util.HttpUtil;
 import com.victorlaerte.supermarket.util.StringPool;
 import com.victorlaerte.supermarket.util.SuperMarketUtil;
 import com.victorlaerte.supermarket.util.Validator;
-import com.victorlaerte.supermarket.util.WebServiceUtil;
 import com.victorlaerte.supermarket.view.ItemListActivity;
 
 import android.os.AsyncTask;
@@ -30,93 +29,80 @@ import android.util.Log;
 
 public class GetCartItemsTask extends AsyncTask<String, String, Boolean> {
 
-    private static final String TAG = GetCartItemsTask.class.getName();
-    private WeakReference<ItemListActivity> wItemListActivity;
-    private String url = Constants.DATA_BASE_URL + Constants.CART_ENDPOINT;
-    private User user;
-    private String errorMsg = StringPool.BLANK;
+	private static final String TAG = GetCartItemsTask.class.getName();
+	private WeakReference<ItemListActivity> wItemListActivity;
+	private String url = Constants.DATA_BASE_URL + Constants.CART_ENDPOINT;
+	private User user;
 
-    public GetCartItemsTask(ItemListActivity itemListActivity, User user) {
+	public GetCartItemsTask(ItemListActivity itemListActivity, User user) {
 
-        wItemListActivity = new WeakReference<ItemListActivity>(itemListActivity);
-        this.user = user;
-    }
+		wItemListActivity = new WeakReference<ItemListActivity>(itemListActivity);
+		this.user = user;
+	}
 
-    protected Boolean doInBackground(String... params) {
+	protected Boolean doInBackground(String... params) {
 
-        Map<String, String> httpParams = new HashMap<String, String>();
+		Map<String, String> httpParams = new HashMap<String, String>();
 
-        try {
+		try {
 
-            JSONObject jsonResponse = WebServiceUtil.readJSONResponse(url, HttpMethod.GET, httpParams, true,
-                    SuperMarketUtil.getAuthString(user.getToken().getAccessToken()));
+			JSONObject jsonResponse = HttpUtil.sendRequest(url, HttpMethod.GET, httpParams,
+					SuperMarketUtil.getAuthString(user.getToken().getAccessToken()));
 
-            Log.d(TAG, jsonResponse.toString());
+			Log.d(TAG, jsonResponse.toString());
 
-            if (WebServiceUtil.isHttpSuccess(jsonResponse.getInt(Constants.STATUS_CODE))) {
+			if (HttpUtil.isHttpSuccess(jsonResponse.getInt(Constants.STATUS_CODE))) {
 
-                JSONArray body = jsonResponse.getJSONArray(Constants.BODY);
+				JSONArray body = jsonResponse.getJSONArray(Constants.BODY);
 
-                for (int i = 0; i < body.length(); i++) {
+				Cart.getInstance().clear();
 
-                    JSONObject currentCartItem = body.getJSONObject(i);
+				for (int i = 0; i < body.length(); i++) {
 
-                    try {
+					JSONObject currentCartItem = body.getJSONObject(i);
 
-                        String cartItemId = currentCartItem.getString("id");
-                        String userId = currentCartItem.getString("userId");
+					try {
 
-                        String productTitle = currentCartItem.getString("productTitle");
-                        String productFilename = currentCartItem.getString("productFilename");
-                        String productId = currentCartItem.getString("productId");
+						String cartItemId = currentCartItem.getString("id");
+						String userId = currentCartItem.getString("userId");
 
-                        Object productPriceObj = currentCartItem.get("productPrice");
+						String productTitle = currentCartItem.getString("productTitle");
+						String productFilename = currentCartItem.getString("productFilename");
+						String productId = currentCartItem.getString("productId");
 
-                        double price = 0;
+						Double price = currentCartItem.getDouble("productPrice");
 
-                        if (productPriceObj instanceof Double) {
+						MarketItemImpl marketItem = new MarketItemImpl(productId, productTitle, productTitle,
+								StringPool.BLANK, price, 0, productFilename, 200, 200);
 
-                            price = (Double) productPriceObj;
+						Cart.getInstance().addItem(new CartItemImpl(cartItemId, marketItem));
 
-                        } else if (productPriceObj instanceof String) {
+					} catch (JSONException ex) {
 
-                            price = Double.valueOf((String) productPriceObj);
-                        }
+						Log.e(TAG, ex.getMessage());
+					}
+				}
 
-                        MarketItemImpl marketItem = new MarketItemImpl(productId, productTitle, productTitle, StringPool.BLANK, price, 0, productFilename, 200, 200);
+				return true;
 
-                        Cart.getInstance().addItem(cartItemId, marketItem);
+			}
 
-                    } catch (JSONException ex) {
+		} catch (Exception e) {
 
-                        Log.e(TAG, ex.getMessage());
-                    }
-                }
+			Log.e(TAG, e.getMessage());
+		}
 
-                return true;
+		return false;
+	}
 
-            } else {
+	@Override
+	protected void onPostExecute(final Boolean success) {
 
-                errorMsg = jsonResponse.getString(Constants.STATUS_MSG);
-            }
+		ItemListActivity itemListActivity = wItemListActivity.get();
 
-        } catch (Exception e) {
+		if (Validator.isNotNull(itemListActivity) && success) {
 
-            errorMsg = AndroidUtil.getString(wItemListActivity.get(), R.string.error_unknown_error);
-            Log.e(TAG, e.getMessage());
-        }
-
-        return false;
-    }
-
-    @Override
-    protected void onPostExecute(final Boolean success) {
-
-        ItemListActivity itemListActivity = wItemListActivity.get();
-
-        if (Validator.isNotNull(itemListActivity) && success) {
-
-            itemListActivity.refreshCartView();
-        }
-    }
+			itemListActivity.refreshCartView();
+		}
+	}
 }

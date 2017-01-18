@@ -12,16 +12,16 @@ import org.json.JSONObject;
 
 import com.victorlaerte.supermarket.R;
 import com.victorlaerte.supermarket.model.Cart;
-import com.victorlaerte.supermarket.model.MarketItem;
+import com.victorlaerte.supermarket.model.CartItem;
 import com.victorlaerte.supermarket.model.User;
 import com.victorlaerte.supermarket.util.AndroidUtil;
 import com.victorlaerte.supermarket.util.Constants;
 import com.victorlaerte.supermarket.util.DialogUtil;
 import com.victorlaerte.supermarket.util.HttpMethod;
+import com.victorlaerte.supermarket.util.HttpUtil;
 import com.victorlaerte.supermarket.util.StringPool;
 import com.victorlaerte.supermarket.util.SuperMarketUtil;
 import com.victorlaerte.supermarket.util.Validator;
-import com.victorlaerte.supermarket.util.WebServiceUtil;
 import com.victorlaerte.supermarket.view.ItemListActivity;
 
 import android.os.AsyncTask;
@@ -33,33 +33,30 @@ public class DeleteItemFromCartTask extends AsyncTask<String, String, Boolean> {
 	private WeakReference<ItemListActivity> wItemListActivity;
 	private String url = Constants.DATA_BASE_URL + Constants.CART_ENDPOINT;
 	private User user;
-	private String cartItemId;
-	private MarketItem marketItem;
+	private CartItem cartItem;
 	private String errorMsg = StringPool.BLANK;
 
-	public DeleteItemFromCartTask(ItemListActivity itemListActivity, User user, String cartItemId,
-			MarketItem marketItem) {
+	public DeleteItemFromCartTask(ItemListActivity itemListActivity, User user, CartItem cartItem) {
 
 		wItemListActivity = new WeakReference<ItemListActivity>(itemListActivity);
 		this.user = user;
-		this.cartItemId = cartItemId;
-		this.marketItem = marketItem;
+		this.cartItem = cartItem;
 	}
 
 	protected Boolean doInBackground(String... params) {
 
 		Map<String, String> httpParams = new HashMap<String, String>();
 
-		url += StringPool.FORWARD_SLASH + cartItemId;
+		url += StringPool.FORWARD_SLASH + cartItem.getId();
 
 		try {
 
-			JSONObject jsonResponse = WebServiceUtil.readJSONResponse(url, HttpMethod.DELETE, httpParams, true,
+			JSONObject jsonResponse = HttpUtil.sendRequest(url, HttpMethod.DELETE, httpParams,
 					SuperMarketUtil.getAuthString(user.getToken().getAccessToken()));
 
 			Log.d(TAG, jsonResponse.toString());
 
-			if (WebServiceUtil.isHttpSuccess(jsonResponse.getInt(Constants.STATUS_CODE))) {
+			if (HttpUtil.isHttpSuccess(jsonResponse.getInt(Constants.STATUS_CODE))) {
 
 				return true;
 			} else {
@@ -69,7 +66,11 @@ public class DeleteItemFromCartTask extends AsyncTask<String, String, Boolean> {
 
 		} catch (Exception e) {
 
-			errorMsg = AndroidUtil.getString(wItemListActivity.get(), R.string.error_unknown_error);
+			if (Validator.isNotNull(wItemListActivity.get())) {
+
+				errorMsg = AndroidUtil.getString(wItemListActivity.get(), R.string.error_unknown_error);
+			}
+
 			Log.e(TAG, e.getMessage());
 		}
 
@@ -83,7 +84,7 @@ public class DeleteItemFromCartTask extends AsyncTask<String, String, Boolean> {
 
 		if (Validator.isNotNull(itemListActivity) && success) {
 
-			Cart.getInstance().removeItem(cartItemId, marketItem);
+			Cart.getInstance().removeItem(cartItem);
 
 			itemListActivity.refreshCartView();
 

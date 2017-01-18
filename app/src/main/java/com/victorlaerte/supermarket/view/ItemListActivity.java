@@ -143,7 +143,7 @@ public class ItemListActivity extends AppCompatActivity {
 						.setAction("Action", null)
 						.show();
 
-				Cart.getInstance().removeAll();
+				Cart.getInstance().clear();
 
 				dialog.dismiss();
 				cartDialog = null;
@@ -226,8 +226,7 @@ public class ItemListActivity extends AppCompatActivity {
 						row.findViewById(R.id.item_cart_progress).setVisibility(View.VISIBLE);
 						deleteButton.setVisibility(View.GONE);
 
-						new DeleteItemFromCartTask(ItemListActivity.this, user, cartItem.getId(), marketItem).execute(
-								(String) null);
+						new DeleteItemFromCartTask(ItemListActivity.this, user, cartItem).execute((String) null);
 					} else {
 
 						/*TODO*/

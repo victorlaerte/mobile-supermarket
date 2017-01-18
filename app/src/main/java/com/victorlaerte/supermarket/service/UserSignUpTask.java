@@ -12,9 +12,9 @@ import org.json.JSONObject;
 
 import com.victorlaerte.supermarket.util.Constants;
 import com.victorlaerte.supermarket.util.HttpMethod;
+import com.victorlaerte.supermarket.util.HttpUtil;
 import com.victorlaerte.supermarket.util.JSONUtil;
 import com.victorlaerte.supermarket.util.Validator;
-import com.victorlaerte.supermarket.util.WebServiceUtil;
 import com.victorlaerte.supermarket.view.LoginActivity;
 
 import android.os.AsyncTask;
@@ -48,9 +48,9 @@ public class UserSignUpTask extends AsyncTask<Void, Void, Boolean> {
 
 		try {
 
-			jsonResponse = WebServiceUtil.readJSONResponse(url, HttpMethod.POST, httpParams);
+			jsonResponse = HttpUtil.sendRequest(url, HttpMethod.POST, httpParams, null);
 
-			if (WebServiceUtil.isHttpSuccess(jsonResponse.getInt(Constants.STATUS_CODE))) {
+			if (HttpUtil.isHttpSuccess(jsonResponse.getInt(Constants.STATUS_CODE))) {
 
 				return true;
 			}
