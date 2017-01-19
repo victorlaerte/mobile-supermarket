@@ -23,6 +23,7 @@ import com.victorlaerte.supermarket.model.impl.MarketItemImpl;
 import com.victorlaerte.supermarket.service.DeleteItemFromCartTask;
 import com.victorlaerte.supermarket.service.GetCartItemsTask;
 import com.victorlaerte.supermarket.service.GetMarketItemsTask;
+import com.victorlaerte.supermarket.service.SaveItemToCartTask;
 import com.victorlaerte.supermarket.util.AndroidUtil;
 import com.victorlaerte.supermarket.util.Constants;
 import com.victorlaerte.supermarket.util.DialogUtil;
@@ -110,7 +111,7 @@ public class ItemListActivity extends AppCompatActivity {
 			}
 		});
 
-		if (checkTablet()) {
+		if (SuperMarketUtil.checkTablet(ItemListActivity.this)) {
 
 			twoPane = true;
 		}
@@ -119,6 +120,23 @@ public class ItemListActivity extends AppCompatActivity {
 		// ATTENTION: This was auto-generated to implement the App Indexing API.
 		// See https://g.co/AppIndexing/AndroidStudio for more information.
 		client = new GoogleApiClient.Builder(this).addApi(AppIndex.API).build();
+	}
+
+	public void saveItemToCart(View view, MarketItem marketItem) {
+
+		if (AndroidUtil.isNetworkAvaliable(getApplicationContext())) {
+
+			new SaveItemToCartTask(ItemListActivity.this, user, marketItem).execute();
+
+		} else {
+
+			DialogUtil.showAlertDialog(ItemListActivity.this, getString(R.string.error),
+					getString(R.string.error_cart_offline_mode));
+		}
+
+		Snackbar.make(view, getString(R.string.item_added_to_cart), Snackbar.LENGTH_LONG)
+				.setAction("Action", null)
+				.show();
 	}
 
 	private void buildCartDialog(final View view) {
@@ -143,7 +161,16 @@ public class ItemListActivity extends AppCompatActivity {
 						.setAction("Action", null)
 						.show();
 
-				Cart.getInstance().clear();
+				if (AndroidUtil.isNetworkAvaliable(ItemListActivity.this)) {
+
+					for (Map.Entry<String, CartItem> entry : Cart.getInstance().getMap().entrySet()) {
+
+						String marketItemId = entry.getKey();
+						CartItem cartItem = entry.getValue();
+
+						new DeleteItemFromCartTask(ItemListActivity.this, user, cartItem).execute();
+					}
+				}
 
 				dialog.dismiss();
 				cartDialog = null;
@@ -226,10 +253,12 @@ public class ItemListActivity extends AppCompatActivity {
 						row.findViewById(R.id.item_cart_progress).setVisibility(View.VISIBLE);
 						deleteButton.setVisibility(View.GONE);
 
-						new DeleteItemFromCartTask(ItemListActivity.this, user, cartItem).execute((String) null);
+						new DeleteItemFromCartTask(ItemListActivity.this, user, cartItem).execute();
+
 					} else {
 
-						/*TODO*/
+						DialogUtil.showAlertDialog(ItemListActivity.this, getString(R.string.error),
+								getString(R.string.error_cart_offline_mode));
 					}
 				}
 			});
@@ -265,10 +294,10 @@ public class ItemListActivity extends AppCompatActivity {
 			showProgress(true);
 
 			GetCartItemsTask getCartItemsTask = new GetCartItemsTask(this, user);
-			getCartItemsTask.execute((String) null);
+			getCartItemsTask.execute();
 
 			GetMarketItemsTask getMarketItemsTask = new GetMarketItemsTask(this, user, null);
-			getMarketItemsTask.execute((Void) null);
+			getMarketItemsTask.execute();
 
 		} else {
 
@@ -487,20 +516,6 @@ public class ItemListActivity extends AppCompatActivity {
 
 		user = savedInstanceState.getParcelable(Constants.USER);
 		Cart.restore(savedInstanceState);
-	}
-
-	private boolean checkTablet() {
-
-		// The detail container view will be present only in the
-		// large-screen layouts (res/values-w900dp).
-		// If this view is present, then the
-		// activity should be in two-pane mode.
-
-		if (findViewById(R.id.item_detail_container) != null) {
-			return true;
-		} else {
-			return false;
-		}
 	}
 
 	/**

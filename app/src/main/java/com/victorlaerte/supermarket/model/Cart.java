@@ -24,17 +24,17 @@ public class Cart implements Parcelable {
 		map = new HashMap<String, CartItem>();
 	}
 
-	public void clear() {
+	public synchronized void clear() {
 
 		map.clear();
 	}
 
-	public Map<String, CartItem> getMap() {
+	public synchronized Map<String, CartItem> getMap() {
 
 		return map;
 	}
 
-	public void addItem(CartItem cartItem) {
+	public synchronized void addItem(CartItem cartItem) {
 
 		if (map.containsKey(cartItem.getMarketItem().getId())) {
 
@@ -48,7 +48,7 @@ public class Cart implements Parcelable {
 		}
 	}
 
-	public void removeItem(CartItem cartItem) {
+	public synchronized void removeItem(CartItem cartItem) {
 
 		if (map.containsKey(cartItem.getMarketItem().getId())) {
 

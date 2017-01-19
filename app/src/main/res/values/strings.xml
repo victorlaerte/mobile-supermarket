@@ -13,6 +13,7 @@
     <string name="error_incorrect_password">This password is incorrect</string>
     <string name="error_field_required">This field is required</string>
     <string name="error_offline_mode">To use in offline mode, at least one online login is required</string>
+    <string name="error_cart_offline_mode">Cart is not available in offline mode</string>
     <string name="error_unknown_error">Unknown Error</string>
     <string name="error_contact_administrator">Please contact administrator</string>
     <string name="error_sign_up">Sign Up Error.</string>

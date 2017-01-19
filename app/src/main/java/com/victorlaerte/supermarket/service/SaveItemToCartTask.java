@@ -22,24 +22,24 @@ import com.victorlaerte.supermarket.util.HttpUtil;
 import com.victorlaerte.supermarket.util.StringPool;
 import com.victorlaerte.supermarket.util.SuperMarketUtil;
 import com.victorlaerte.supermarket.util.Validator;
-import com.victorlaerte.supermarket.view.ItemDetailActivity;
 
+import android.app.Activity;
 import android.os.AsyncTask;
 import android.util.Log;
 
 public class SaveItemToCartTask extends AsyncTask<String, String, Boolean> {
 
 	private static final String TAG = SaveItemToCartTask.class.getName();
-	private WeakReference<ItemDetailActivity> wItemDetailActivity;
+	private WeakReference<Activity> wActivity;
 	private String url = Constants.DATA_BASE_URL + Constants.CART_ENDPOINT;
 	private User user;
 	private MarketItem marketItem;
 	private CartItem cartItem;
 	private String errorMsg = StringPool.BLANK;
 
-	public SaveItemToCartTask(ItemDetailActivity itemDetailActivity, User user, MarketItem marketItem) {
+	public SaveItemToCartTask(Activity activity, User user, MarketItem marketItem) {
 
-		wItemDetailActivity = new WeakReference<ItemDetailActivity>(itemDetailActivity);
+		wActivity = new WeakReference<Activity>(activity);
 		this.user = user;
 		this.marketItem = marketItem;
 	}
@@ -74,8 +74,8 @@ public class SaveItemToCartTask extends AsyncTask<String, String, Boolean> {
 
 		} catch (Exception e) {
 
-			if (wItemDetailActivity.get() != null) {
-				errorMsg = AndroidUtil.getString(wItemDetailActivity.get(), R.string.error_unknown_error);
+			if (wActivity.get() != null) {
+				errorMsg = AndroidUtil.getString(wActivity.get(), R.string.error_unknown_error);
 			}
 			Log.e(TAG, e.getMessage());
 		}
@@ -86,16 +86,16 @@ public class SaveItemToCartTask extends AsyncTask<String, String, Boolean> {
 	@Override
 	protected void onPostExecute(final Boolean success) {
 
-		ItemDetailActivity itemDetailActivity = wItemDetailActivity.get();
+		Activity activity = wActivity.get();
 
-		if (Validator.isNotNull(itemDetailActivity) && success) {
+		if (Validator.isNotNull(activity) && success) {
 
 			Cart.getInstance().addItem(cartItem);
 
-		} else if (Validator.isNotNull(itemDetailActivity) && !success) {
+		} else if (Validator.isNotNull(activity) && !success) {
 
-			DialogUtil.showAlertDialog(itemDetailActivity, itemDetailActivity.getString(R.string.error),
-					errorMsg + StringPool.SPACE + itemDetailActivity.getString(R.string.adding_item_to_cart));
+			DialogUtil.showAlertDialog(activity, activity.getString(R.string.error),
+					errorMsg + StringPool.SPACE + activity.getString(R.string.adding_item_to_cart));
 		}
 	}
 

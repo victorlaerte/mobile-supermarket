@@ -201,12 +201,12 @@ public class LoginActivity extends AppCompatActivity {
 				if (signUp && Validator.isNull(signUpTask) && Validator.isNull(userLoginTask)) {
 
 					signUpTask = new UserSignUpTask(this, name, email, password);
-					signUpTask.execute((Void) null);
+					signUpTask.execute();
 
 				} else if (Validator.isNull(userLoginTask) && Validator.isNull(signUpTask)) {
 
 					userLoginTask = new UserLoginTask(this, email, password);
-					userLoginTask.execute((Void) null);
+					userLoginTask.execute();
 
 				}
 
@@ -441,7 +441,7 @@ public class LoginActivity extends AppCompatActivity {
 				Token token = new TokenImpl(accessToken, tokenType);
 
 				getUserInfoTask = new GetUserInfoTask(LoginActivity.this, token);
-				getUserInfoTask.execute((Void) null);
+				getUserInfoTask.execute();
 
 			} else {
 

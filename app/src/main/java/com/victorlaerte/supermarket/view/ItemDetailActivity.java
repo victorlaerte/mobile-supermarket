@@ -6,6 +6,7 @@ import com.victorlaerte.supermarket.model.User;
 import com.victorlaerte.supermarket.service.SaveItemToCartTask;
 import com.victorlaerte.supermarket.util.AndroidUtil;
 import com.victorlaerte.supermarket.util.Constants;
+import com.victorlaerte.supermarket.util.DialogUtil;
 import com.victorlaerte.supermarket.util.Validator;
 
 import android.os.Bundle;
@@ -57,18 +58,7 @@ public class ItemDetailActivity extends AppCompatActivity {
 			@Override
 			public void onClick(View view) {
 
-				if (AndroidUtil.isNetworkAvaliable(getApplicationContext())) {
-
-					new SaveItemToCartTask(ItemDetailActivity.this, user, marketItem).execute((String) null);
-
-				} else {
-
-					/*Cart.getInstance().addItem(marketItem);*/
-				}
-
-				Snackbar.make(view, getString(R.string.item_added_to_cart), Snackbar.LENGTH_LONG)
-						.setAction("Action", null)
-						.show();
+				saveItemToCart(view);
 			}
 		});
 
@@ -97,6 +87,23 @@ public class ItemDetailActivity extends AppCompatActivity {
 			fragment.setArguments(arguments);
 			getSupportFragmentManager().beginTransaction().add(R.id.item_detail_container, fragment).commit();
 		}
+	}
+
+	public void saveItemToCart(View view) {
+
+		if (AndroidUtil.isNetworkAvaliable(getApplicationContext())) {
+
+			new SaveItemToCartTask(ItemDetailActivity.this, user, marketItem).execute();
+
+		} else {
+
+			DialogUtil.showAlertDialog(ItemDetailActivity.this, getString(R.string.error),
+					getString(R.string.error_cart_offline_mode));
+		}
+
+		Snackbar.make(view, getString(R.string.item_added_to_cart), Snackbar.LENGTH_LONG)
+				.setAction("Action", null)
+				.show();
 	}
 
 	@Override
