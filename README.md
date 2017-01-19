@@ -65,3 +65,13 @@ Parâmetros | productTitle: String<br>productPrice: double<br>productFilename: S
 * Remover produto do carrinho: DELETE /cart/[id]
 	Onde id é o id do item no carrinho.
 
+![ss1](https://github.com/victorlaerte/mobile-supermarket/blob/master/screenshots/ss1.png)
+![ss2](https://github.com/victorlaerte/mobile-supermarket/blob/master/screenshots/ss2.png)
+![ss3](https://github.com/victorlaerte/mobile-supermarket/blob/master/screenshots/ss3.png)
+![ss4](https://github.com/victorlaerte/mobile-supermarket/blob/master/screenshots/ss4.png)
+![ss5](https://github.com/victorlaerte/mobile-supermarket/blob/master/screenshots/ss5.png)
+![ss6](https://github.com/victorlaerte/mobile-supermarket/blob/master/screenshots/ss6.png)
+![ss7](https://github.com/victorlaerte/mobile-supermarket/blob/master/screenshots/ss7.png)
+
+![ss8](https://github.com/victorlaerte/mobile-supermarket/blob/master/screenshots/ss8.png)
+![ss9](https://github.com/victorlaerte/mobile-supermarket/blob/master/screenshots/ss9.png)
