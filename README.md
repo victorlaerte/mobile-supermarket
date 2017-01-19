@@ -1,8 +1,6 @@
 # mobile-supermarket
 Mobile Supermarket
 
-https://docs.google.com/document/d/1hG9rsdBhmDRZY89tgGKtzD768cj_v9tGJMLMa_xCXVA/edit?ts=5874ead5
-
 O Mobile Supermarket (http://public.mobilesupermarket.wedeploy.io/) é uma aplicação que deve rodar em Android e/ou iOS e permite realizar compras de alimentos online.
 O app deve fornecer uma lista de itens que podem ser adquiridos pelo usuário e deve ser possível mostrar os detalhes disponíveis do produto, em uma tela separada. Para tornar mais fácil encontrar o que está buscando, o usuário é capaz de filtrar a lista de produtos pelo seu tipo (Bakery, Dairy, Fruit, Vegetable, Meat). O usuário também deve ser capaz de adicionar e visualizar produtos no carrinho.
 
